@@ -12,7 +12,7 @@
 
 ## Overview
 
-This repository modernizes the reactor physics core of my **Imperial College London HTGR-5 / HR-5 project** (*"Scaled High Temperature Test Reactor Cogeneration for Zero Emission Hybrid-Desalination"*, led by me over a 7-month simulation construction period) — a 300 MWth scaled High-Temperature Gas-Cooled Reactor (HTGR) design originally simulated in MATLAB/Simulink — into a modular, dependency-light Python pipeline.
+This repository modernizes the reactor physics core of my **Imperial College London HTGR-5 / HR-5 project** (*"Scaled High Temperature Test Reactor Cogeneration for Zero Emission Hybrid-Desalination"*, led by me over a 7-month simulation construction period) — a 300 MWth scaled High-Temperature Gas-Cooled Reactor (HTGR) design originally simulated in Python/MATLAB/Simulink — into a modular, dependency-light Python pipeline.
 
 Rather than a line-for-line port, this is a full re-architecture: the original `Calculate_Kinetics.m` and `core_thermals.m` Simulink blocks become a single stiff coupled ODE system solved with SciPy; a 1,000-run Monte Carlo sweep over realistic operating envelopes generates training telemetry with pandas; and a scalable kernel-approximation surrogate (scikit-learn) replaces the O(N³) cost of an exact Gaussian Process, wrapped in a small autonomous agent that makes an explicit accept/flag/reject safety call on every candidate operating point — with a documented reason why, every time.
 
