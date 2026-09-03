@@ -61,7 +61,7 @@ This section exists because "we used a Gaussian Process approximation" is a sent
 ```mermaid
 flowchart LR
     A["htgr_physics.py<br/>10-state ODE<br/>(kinetics + thermal core)"] -->|"1,000x steady_state()<br/>+ solve_ivp()"| B["data_pipeline.py<br/>+ CoolProp turbine work"]
-    B -->|"1,000 rows"| C[("htgr_telemetry.csv")]
+    B -->|"1,000 rows"| C["htgr_telemetry.csv"]
     C --> D["ml_surrogate.py<br/>StandardScaler -> Nystroem(RBF)<br/>-> BayesianRidge<br/>(one pipeline per target)"]
     D -->|"mean, std per target"| E["HTGRAgent<br/>3 independent checks"]
     E --> F["NOMINAL / UNCERTAIN / UNSAFE<br/>+ diagnostics"]
@@ -83,9 +83,9 @@ flowchart LR
 
 ### 2. Why not just use an exact Gaussian Process?
 
-A GP is the natural choice here because it's a distribution over functions with calibrated uncertainty built in. Given N training points, its posterior at a query x\* is:
+A GP is the natural choice here because it's a distribution over functions with calibrated uncertainty built in. Given N training points, its posterior at a query point $x_{\ast}$ is:
 
-$$\mu_*(x) = k(x)^\top (K + \sigma_n^2 I)^{-1} y \qquad\qquad \sigma_*^2(x) = k(x,x) - k(x)^\top (K + \sigma_n^2 I)^{-1} k(x)$$
+$$\mu_{\ast}(x) = k(x)^\top (K + \sigma_n^2 I)^{-1} y \qquad\qquad \sigma_{\ast}^2(x) = k(x,x) - k(x)^\top (K + \sigma_n^2 I)^{-1} k(x)$$
 
 where $K \in \mathbb{R}^{N\times N}$ is the Gram matrix ($K_{ij} = k(x_i,x_j)$ for the RBF kernel), $k(x)\in\mathbb{R}^N$ is the vector of kernel evaluations against every training point, and $\sigma_n^2$ is observation noise.
 
@@ -113,11 +113,11 @@ Gamma hyperpriors on the noise precision β and weight precision α are resolved
 
 $$\Sigma_w = \left(\alpha I + \beta\,\Phi^\top\Phi\right)^{-1} \qquad\qquad \mu_w = \beta\,\Sigma_w\,\Phi^\top y$$
 
-Forming $\Phi^\top\Phi$ costs O(N m²); inverting the resulting m×m matrix costs O(m³) — independent of N. For a new point x\*, with $\varphi_* = \varphi(x_*)$:
+Forming $\Phi^\top\Phi$ costs O(N m²); inverting the resulting m×m matrix costs O(m³) — independent of N. For a new query point $x_{\ast}$, with $\varphi_{\ast} = \varphi(x_{\ast})$:
 
-$$\hat{y}_* = \varphi_*^\top \mu_w \quad\text{(predictive mean)} \qquad\qquad \sigma_*^2 = \beta^{-1} + \varphi_*^\top \Sigma_w\,\varphi_* \quad\text{(predictive variance)}$$
+$$\hat{y}_{\ast} = \varphi_{\ast}^\top \mu_w \quad\text{(predictive mean)} \qquad\qquad \sigma_{\ast}^2 = \beta^{-1} + \varphi_{\ast}^\top \Sigma_w\,\varphi_{\ast} \quad\text{(predictive variance)}$$
 
-This is exactly what `pipeline.predict(X, return_std=True)` returns — **verified directly** (see Debug Log §3) before it was trusted as the foundation of the whole uncertainty story. $\sigma_*^2$ has two components: $\beta^{-1}$ (irreducible/aleatoric noise) and $\varphi_*^\top\Sigma_w\varphi_*$ (epistemic uncertainty about the weights) — the second term is what *should*, in principle, grow as $\varphi_*$ moves away from the training feature distribution.
+This is exactly what `pipeline.predict(X, return_std=True)` returns — **verified directly** (see Debug Log §3) before it was trusted as the foundation of the whole uncertainty story. $\sigma_{\ast}^2$ has two components: $\beta^{-1}$ (irreducible/aleatoric noise) and $\varphi_{\ast}^\top\Sigma_w\varphi_{\ast}$ (epistemic uncertainty about the weights) — the second term is what *should*, in principle, grow as $\varphi_{\ast}$ moves away from the training feature distribution.
 
 ### 5. Complexity comparison
 
@@ -133,7 +133,7 @@ At N=800, m≤300 this is already meaningfully cheaper; the gap becomes decisive
 
 ### 6. The honest limitation — why the agent doesn't trust σ alone
 
-$\varphi$ is built from a **fixed, global** set of m landmarks chosen once at training time. An exact RBF-kernel GP's uncertainty is *guaranteed by construction* to widen with distance from training data, because $k(x_*, x_i) \to 0$ for a stationary kernel as distance grows. A Nyström-approximated linear model offers **no such guarantee** — nothing forces $\varphi_*^\top\Sigma_w\varphi_*$ to grow smoothly outside the span of the training landmarks. This is a real, structural limitation of the approach, not a footnote, and it's the direct reason `HTGRAgent` was built with a second, independent, deterministic check rather than trusting the model's self-reported σ alone.
+$\varphi$ is built from a **fixed, global** set of m landmarks chosen once at training time. An exact RBF-kernel GP's uncertainty is *guaranteed by construction* to widen with distance from training data, because $k(x_{\ast}, x_i) \to 0$ for a stationary kernel as distance grows. A Nyström-approximated linear model offers **no such guarantee** — nothing forces $\varphi_{\ast}^\top\Sigma_w\varphi_{\ast}$ to grow smoothly outside the span of the training landmarks. This is a real, structural limitation of the approach, not a footnote, and it's the direct reason `HTGRAgent` was built with a second, independent, deterministic check rather than trusting the model's self-reported σ alone.
 
 ### 7. `HTGRAgent`: the exact conditional logic
 
