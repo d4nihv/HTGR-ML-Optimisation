@@ -59,12 +59,28 @@ This section exists because "we used a Gaussian Process approximation" is a sent
 ### 0. End-to-end workflow
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {
+  "fontFamily": "Georgia, \"Times New Roman\", serif",
+  "fontSize": "15px",
+  "lineColor": "#7C7362",
+  "edgeLabelBackground": "#F5F1E6"
+}}}%%
 flowchart LR
     A["htgr_physics.py<br/>10-state ODE<br/>(kinetics + thermal core)"] -->|"1,000x steady_state()<br/>+ solve_ivp()"| B["data_pipeline.py<br/>+ CoolProp turbine work"]
     B -->|"1,000 rows"| C["htgr_telemetry.csv"]
     C --> D["ml_surrogate.py<br/>StandardScaler -> Nystroem(RBF)<br/>-> BayesianRidge<br/>(one pipeline per target)"]
     D -->|"mean, std per target"| E["HTGRAgent<br/>3 independent checks"]
     E --> F["NOMINAL / UNCERTAIN / UNSAFE<br/>+ diagnostics"]
+
+    classDef process fill:#1F3A5F,stroke:#13273F,stroke-width:1.5px,color:#F5F1E6,rx:6,ry:6
+    classDef data fill:#16697A,stroke:#0E4A56,stroke-width:1.5px,color:#F5F1E6,rx:6,ry:6
+    classDef agent fill:#B8860B,stroke:#8A6508,stroke-width:1.5px,color:#211A08,rx:6,ry:6
+    classDef outcome fill:#54626F,stroke:#3A4650,stroke-width:1.5px,color:#F5F1E6,rx:6,ry:6
+
+    class A,B,D process
+    class C data
+    class E agent
+    class F outcome
 ```
 
 ### 1. Feature / target definitions
@@ -163,6 +179,12 @@ if fuel_upper_bound > FUEL_TEMP_SAFETY_MARGIN_K:          # 1650 K
 Note this uses the **upper confidence bound**, not the raw mean — a scenario whose mean prediction sits under 1650 K but whose uncertainty band pushes the credible upper bound past it is still flagged unsafe. This check has teeth: it overrides everything else.
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {
+  "fontFamily": "Georgia, \"Times New Roman\", serif",
+  "fontSize": "15px",
+  "lineColor": "#7C7362",
+  "edgeLabelBackground": "#F5F1E6"
+}}}%%
 flowchart TD
     A["Candidate operating point (7 features)"] --> B{"Any feature outside<br/>training envelope?"}
     B -- yes --> F1["FLAG: EXTRAPOLATION RISK<br/>status -> UNCERTAIN"]
@@ -175,6 +197,18 @@ flowchart TD
     D -- no --> E["status = NOMINAL"]
     F3 --> G["Generate physics-grounded<br/>recommendations"]
     E --> H["Clear scenario"]
+
+    classDef input fill:#1F3A5F,stroke:#13273F,stroke-width:1.5px,color:#F5F1E6,rx:6,ry:6
+    classDef decision fill:#B8860B,stroke:#8A6508,stroke-width:1.5px,color:#211A08
+    classDef flag fill:#7B241C,stroke:#571910,stroke-width:1.5px,color:#F5F1E6,rx:6,ry:6
+    classDef nominal fill:#2E4C39,stroke:#1E3226,stroke-width:1.5px,color:#F5F1E6,rx:6,ry:6
+    classDef action fill:#16697A,stroke:#0E4A56,stroke-width:1.5px,color:#F5F1E6,rx:6,ry:6
+
+    class A input
+    class B,C,D decision
+    class F1,F2,F3 flag
+    class E nominal
+    class G,H action
 ```
 
 When status ≠ NOMINAL, `_recommend()` applies simple heuristics tied directly to the `core_thermals.m` energy balance — not a black-box output:
@@ -214,6 +248,17 @@ jupyter notebook notebooks/HTGR_Analysis.ipynb
 streamlit run app.py
 ```
 
+**Note on notebook styling:** `notebooks/*.ipynb` open fine in Jupyter/GitHub, but GitHub's hosted
+`.ipynb` viewer sanitizes embedded CSS, so it won't show the intended serif/parchment "textbook"
+look — only the Mermaid diagrams and matplotlib charts (styled through their own APIs, not raw CSS)
+carry over there. For the fully-styled reading experience, open the standalone HTML twins directly in
+a browser instead: [`notebooks/HTGR_Systems_Textbook.html`](notebooks/HTGR_Systems_Textbook.html) and
+[`notebooks/HTGR_Analysis.html`](notebooks/HTGR_Analysis.html), regenerated via:
+
+```bash
+python scripts/build_styled_html.py
+```
+
 ## Project Structure
 
 ```
@@ -225,7 +270,11 @@ HTGR-ML-Optimization/
 │   └── ml_surrogate.py      # Nystroem+BayesianRidge surrogate + HTGRAgent
 ├── notebooks/
 │   ├── HTGR_Analysis.ipynb          # Executive summary, EDA, uncertainty plots, agent demo
-│   └── HTGR_Systems_Textbook.ipynb  # Postgraduate-style walkthrough: reactor -> cycles -> desal -> HR
+│   ├── HTGR_Analysis.html           # Styled standalone export of the above (see note below)
+│   ├── HTGR_Systems_Textbook.ipynb  # Postgraduate-style walkthrough: reactor -> cycles -> desal -> HR
+│   └── HTGR_Systems_Textbook.html   # Styled standalone export of the above (see note below)
+├── scripts/
+│   └── build_styled_html.py # Regenerates the two .html exports above
 ├── app.py                   # Streamlit dashboard (live agent queries)
 ├── reference/               # Original source artifacts this repo modernizes (see below)
 │   ├── FinalRollsRoyceHTGRImperialReport.pdf
