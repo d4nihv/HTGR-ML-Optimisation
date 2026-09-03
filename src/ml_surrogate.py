@@ -349,6 +349,18 @@ def main() -> HTGRAgent:
         )
         print(f"    best params: {tm.best_params}")
 
+    if HTGRSurrogate.__module__ == "__main__":
+        print(
+            "\nWARNING: this module is running as '__main__' (e.g. `python src/ml_surrogate.py`). "
+            "The saved artifact will be pickled under the '__main__' module and will FAIL to "
+            "unpickle from anywhere that imports this file normally (notebook, app.py, etc.) with "
+            "`AttributeError: Can't get attribute 'TargetModel' on <module '__main__'>`. "
+            "Regenerate instead with:\n"
+            "    python -c \"from src.ml_surrogate import main; main()\"\n"
+            "run from the project root.",
+            file=sys.stderr,
+        )
+
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
     joblib.dump(surrogate, MODEL_PATH)
     print(f"\nSaved trained surrogate to {MODEL_PATH}")

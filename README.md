@@ -224,7 +224,8 @@ HTGR-ML-Optimization/
 │   ├── data_pipeline.py     # 1,000-run Monte Carlo telemetry -> CSV
 │   └── ml_surrogate.py      # Nystroem+BayesianRidge surrogate + HTGRAgent
 ├── notebooks/
-│   └── HTGR_Analysis.ipynb  # Executive summary, EDA, uncertainty plots, agent demo
+│   ├── HTGR_Analysis.ipynb          # Executive summary, EDA, uncertainty plots, agent demo
+│   └── HTGR_Systems_Textbook.ipynb  # Postgraduate-style walkthrough: reactor -> cycles -> desal -> HR
 ├── app.py                   # Streamlit dashboard (live agent queries)
 ├── reference/               # Original source artifacts this repo modernizes (see below)
 │   ├── FinalRollsRoyceHTGRImperialReport.pdf
