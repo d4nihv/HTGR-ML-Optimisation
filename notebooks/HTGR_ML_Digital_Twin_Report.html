@@ -1,0 +1,2792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>HTGR ML Digital Twin Report</title>
+
+<style>
+@page { size: A4; margin: 25mm 20mm; }
+* { box-sizing: border-box; }
+html, body {
+  background: #FAF6EC; color: #2B2620;
+  font-family: "Times New Roman", Times, Georgia, serif;
+  font-size: 18px; line-height: 1.6;
+  margin: 0; padding: 0;
+}
+.page { max-width: 880px; margin: 0 auto; padding: 40px 56px; }
+h1, h2, h3, h4 { font-family: "Times New Roman", Times, Georgia, serif; color: #17304D; font-weight: bold; }
+h1 { font-size: 30px; border-bottom: 2px solid #B8860B; padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 24px; color: #1F3A5F; border-bottom: 1px solid #D8D0BC; padding-bottom: 4px; margin-top: 2.2em; }
+h3 { font-size: 20px; color: #1F3A5F; margin-top: 1.6em; }
+h4 { font-size: 18px; color: #3A4650; margin-top: 1.3em; }
+p { text-align: justify; }
+a { color: #7B241C; text-decoration: none; border-bottom: 1px dotted #7B241C; }
+strong { color: #17304D; }
+em { color: #4A4436; }
+hr { border: none; border-top: 1px solid #D8D0BC; margin: 2em 0; }
+
+.titlepage { text-align: center; padding-top: 22vh; page-break-after: always; }
+.titlepage .kicker { letter-spacing: 4px; color: #B8860B; font-size: 15px; text-transform: uppercase; margin-bottom: 18px; }
+.titlepage h1 { font-size: 34px; border: none; line-height: 1.3; }
+.titlepage .subtitle { font-size: 19px; color: #4A4436; font-style: italic; margin: 14px 0 40px; }
+.titlepage .meta { margin-top: 60px; font-size: 16px; line-height: 1.9; }
+.titlepage .meta b { color: #17304D; }
+
+.notation-page, .toc-page { page-break-after: always; }
+table.notation { width: 100%; border-collapse: collapse; margin: 1em 0; }
+table.notation td { padding: 4px 10px; border-bottom: 1px solid #EDE7D6; vertical-align: top; }
+table.notation td.sym { width: 90px; font-style: italic; white-space: nowrap; }
+
+.toc a { display: block; padding: 3px 0; border-bottom: none; color: #2B2620; }
+.toc a:hover { color: #7B241C; }
+.toc .l1 { font-weight: bold; margin-top: 10px; }
+.toc .l2 { padding-left: 22px; font-size: 16px; color: #4A4436; }
+.toc .l3 { padding-left: 42px; font-size: 15px; color: #6B6355; }
+
+table.data { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 16px; }
+table.data th { background: #E9E0C8; color: #17304D; border: 1px solid #D8D0BC; padding: 6px 10px; text-align: left; }
+table.data td { border: 1px solid #E4DDC9; padding: 6px 10px; }
+table.data tr:nth-child(even) td { background: #F3EEDF; }
+.caption { font-size: 15px; color: #4A4436; margin-top: 4px; font-style: italic; }
+
+blockquote { border-left: 3px solid #B8860B; background: #F3EEDF; color: #4A4436; padding: 10px 18px; margin-left: 0; }
+
+pre.code { background: #F0EBDD; border: 1px solid #D8D0BC; border-radius: 5px; padding: 12px 14px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 12.5px;
+  line-height: 1.45; overflow-x: auto; white-space: pre; page-break-inside: auto; }
+pre.code code { color: #2B2620; }
+.codecap { font-family: "SFMono-Regular", Consolas, monospace; font-size: 14px; color: #17304D;
+  background: #E9E0C8; padding: 4px 10px; border: 1px solid #D8D0BC; border-bottom: none;
+  display: inline-block; border-radius: 5px 5px 0 0; }
+
+.appendix-section { page-break-before: always; }
+.part-break { page-break-before: always; }
+
+.ref-list p { text-indent: -28px; padding-left: 28px; text-align: left; }
+.footer-note { font-size: 14px; color: #6B6355; margin-top: 3em; border-top: 1px solid #D8D0BC; padding-top: 10px; }
+@media print { .page { padding: 0; } }
+</style>
+
+</head>
+<body>
+
+<div class="page titlepage">
+  <div class="kicker">Imperial College London</div>
+  <h1>Scalable Machine-Learning Surrogate Modelling and Autonomous Safety Agents<br/>for a High-Temperature Gas Reactor Digital Twin</h1>
+  <div class="subtitle">A Python-Based Digital-Twin Extension of the Scaled HTTR&ndash;Desalination<br/>
+  Complex Developed in Imperial HTGR&nbsp;5 and HR&nbsp;5 (2026)</div>
+  <div class="meta">
+    <b>Authored by:</b><br/>Muhammad Dani<br/><br/>
+    <b>Extending the reactor and heat-rejection models originally developed with:</b><br/>
+    Michal Krasowski &middot; Qiji Zhang &middot; Clayton Yeung &middot;
+    Oscar Chan &middot; Heidi Chong &middot; Oliver Bush &middot; Muhammad Abubakar &middot; Luca Faillace<br/><br/>
+    Imperial College London<br/>03 September 2026
+  </div>
+</div>
+
+
+<div class="page notation-page">
+<h2 id="notation">Notation</h2>
+<h3>Reactor Physics Symbols (carried over from the original report)</h3>
+<table class="notation">
+<tr><td class="sym">P(t)</td><td>Normalised reactor power</td></tr>
+<tr><td class="sym">&rho;(t)</td><td>Reactivity</td></tr>
+<tr><td class="sym">&beta;</td><td>Total delayed neutron fraction</td></tr>
+<tr><td class="sym">&beta;<sub>i</sub></td><td>Delayed neutron fraction for precursor group i</td></tr>
+<tr><td class="sym">&Lambda;</td><td>Prompt neutron lifetime</td></tr>
+<tr><td class="sym">&lambda;<sub>i</sub></td><td>Decay constant for delayed neutron group i</td></tr>
+<tr><td class="sym">C<sub>i</sub>(t)</td><td>Delayed-neutron precursor concentration for group i</td></tr>
+<tr><td class="sym">T<sub>f</sub>, T<sub>m</sub>, T<sub>c</sub></td><td>Fuel, moderator, and coolant temperature</td></tr>
+<tr><td class="sym">T<sub>in</sub></td><td>Coolant inlet temperature</td></tr>
+<tr><td class="sym">C<sub>f</sub>, C<sub>m</sub>, C<sub>c</sub></td><td>Heat capacities of fuel, moderator, and coolant</td></tr>
+<tr><td class="sym">h<sub>fm</sub>, h<sub>fc</sub>, h<sub>mc</sub></td><td>Inter-node heat-transfer coefficients</td></tr>
+<tr><td class="sym">Q<sub>fission</sub></td><td>Fission heat generation rate</td></tr>
+<tr><td class="sym">&#7745;</td><td>Mass flow rate (helium unless subscripted otherwise)</td></tr>
+<tr><td class="sym">C<sub>p</sub></td><td>Specific heat capacity at constant pressure</td></tr>
+</table>
+<h3>Machine-Learning Symbols (introduced in this report)</h3>
+<table class="notation">
+<tr><td class="sym">N</td><td>Number of training points (Monte Carlo runs)</td></tr>
+<tr><td class="sym">m</td><td>Number of Nystr&ouml;m landmark components, m &laquo; N</td></tr>
+<tr><td class="sym">k(x, x&prime;)</td><td>Kernel function (RBF)</td></tr>
+<tr><td class="sym">K</td><td>Full N&times;N Gram (kernel) matrix</td></tr>
+<tr><td class="sym">K<sub>m,m</sub></td><td>m&times;m Gram matrix among Nystr&ouml;m landmark points</td></tr>
+<tr><td class="sym">&phi;(x)</td><td>Explicit Nystr&ouml;m feature map, &phi;: &#8477;<sup>d</sup> &rarr; &#8477;<sup>m</sup></td></tr>
+<tr><td class="sym">&Phi;</td><td>Stacked N&times;m design matrix of Nystr&ouml;m features</td></tr>
+<tr><td class="sym">w</td><td>Bayesian ridge weight vector</td></tr>
+<tr><td class="sym">&alpha;</td><td>Weight precision (Bayesian ridge prior)</td></tr>
+<tr><td class="sym">&tau;</td><td>Noise precision (Bayesian ridge likelihood); denoted &beta; in some texts, renamed here to avoid clashing with the delayed-neutron fraction &beta;</td></tr>
+<tr><td class="sym">&mu;<sub>w</sub>, &Sigma;<sub>w</sub></td><td>Posterior mean and covariance of the Bayesian ridge weights</td></tr>
+<tr><td class="sym">x<sub>&lowast;</sub></td><td>A query (test) input point</td></tr>
+<tr><td class="sym">&mu;<sub>&lowast;</sub>, &sigma;<sub>&lowast;</sub><sup>2</sup></td><td>Predictive mean and variance at a query point</td></tr>
+<tr><td class="sym">z</td><td>Confidence multiplier for an upper credible bound (z = 2 used throughout)</td></tr>
+<tr><td class="sym">R&sup2;, RMSE</td><td>Coefficient of determination; root-mean-square error</td></tr>
+<h3>Acronyms and Abbreviations</h3>
+<table class="notation">
+<tr><td class="sym">HTGR</td><td>High-Temperature Gas-Cooled Reactor</td></tr>
+<tr><td class="sym">HTTR</td><td>High-Temperature Engineering Test Reactor</td></tr>
+<tr><td class="sym">ODE</td><td>Ordinary Differential Equation</td></tr>
+<tr><td class="sym">GP</td><td>Gaussian Process</td></tr>
+<tr><td class="sym">RBF</td><td>Radial Basis Function (kernel)</td></tr>
+<tr><td class="sym">CI</td><td>Confidence Interval</td></tr>
+<tr><td class="sym">CSV</td><td>Comma-Separated Values</td></tr>
+<tr><td class="sym">CI/CD</td><td>Continuous Integration / Continuous Delivery</td></tr>
+<tr><td class="sym">API</td><td>Application Programming Interface</td></tr>
+<tr><td class="sym">UI</td><td>User Interface</td></tr>
+<tr><td class="sym">MED</td><td>Multi-Effect Distillation</td></tr>
+<tr><td class="sym">CoolProp</td><td>Open-source thermophysical property library</td></tr>
+</table>
+</table>
+</div>
+
+<div class="page toc-page"><h2>Contents</h2><div class="toc"><a class="l1" href="#notation">Notation</a>\n<a class="l1" href="#part1">Part I &ndash; Introduction and Motivation</a>\n<a class="l2" href="#s1-1">1.1 From a Validated Report to a Running Digital Twin</a>\n<a class="l2" href="#s1-2">1.2 Objectives of This Extension</a>\n<a class="l2" href="#s1-3">1.3 Relationship to the Original HTGR-5 / HR-5 Report</a>\n<a class="l2" href="#s1-4">1.4 Report Structure</a>\n<a class="l1" href="#part2">Part II &ndash; Digital Twin Architecture</a>\n<a class="l2" href="#s2-1">2.1 System Architecture and Data Flow</a>\n<a class="l2" href="#s2-2">2.2 Technology Stack</a>\n<a class="l2" href="#s2-3">2.3 Design Principles</a>\n<a class="l1" href="#part3">Part III &ndash; Physics Engine Translation</a>\n<a class="l2" href="#s3-1">3.1 Governing Equations</a>\n<a class="l2" href="#s3-2">3.2 Python Implementation via SciPy solve_ivp</a>\n<a class="l2" href="#s3-3">3.3 Analytic Steady-State Initialisation</a>\n<a class="l2" href="#s3-4">3.4 The Open-Loop Divergence Finding</a>\n<a class="l2" href="#s3-5">3.5 Verification by Sanity Check</a>\n<a class="l2" href="#s3-6">3.6 Validation Against Literature Benchmark Data</a>\n<a class="l1" href="#part4">Part IV &ndash; Monte Carlo Telemetry Generation</a>\n<a class="l2" href="#s4-1">4.1 Sampling Methodology and Operating Envelope</a>\n<a class="l2" href="#s4-2">4.2 Helium Turbine Work Extension</a>\n<a class="l2" href="#s4-3">4.3 Dataset Characteristics</a>\n<a class="l1" href="#part5">Part V &ndash; Scalable Probabilistic Surrogate Modelling</a>\n<a class="l2" href="#s5-1">5.1 The O(N&sup3;) Bottleneck of Exact Gaussian Process Regression</a>\n<a class="l2" href="#s5-2">5.2 The Nystr&ouml;m Kernel Approximation</a>\n<a class="l2" href="#s5-3">5.3 Bayesian Ridge Regression on Nystr&ouml;m Features</a>\n<a class="l2" href="#s5-4">5.4 Complexity Comparison</a>\n<a class="l2" href="#s5-5">5.5 Hyperparameter Optimisation</a>\n<a class="l2" href="#s5-6">5.6 Model Evaluation and Calibration</a>\n<a class="l2" href="#s5-7">5.7 The Honest Limitation of the Approximation</a>\n<a class="l1" href="#part6">Part VI &ndash; HTGRAgent: An Autonomous Safety Decision Layer</a>\n<a class="l2" href="#s6-1">6.1 Motivation and Design Philosophy</a>\n<a class="l2" href="#s6-2">6.2 Conditional Decision Logic</a>\n<a class="l2" href="#s6-3">6.3 The Deterministic Extrapolation Guard</a>\n<a class="l2" href="#s6-4">6.4 Root-Cause Recommendation Engine</a>\n<a class="l2" href="#s6-5">6.5 Demonstration Scenarios</a>\n<a class="l1" href="#part7">Part VII &ndash; Interactive Systems</a>\n<a class="l2" href="#s7-1">7.1 The Systems Textbook Notebook</a>\n<a class="l2" href="#s7-2">7.2 The Streamlit Operating-Point Explorer</a>\n<a class="l2" href="#s7-3">7.3 Styled Static Exports</a>\n<a class="l1" href="#part8">Part VIII &ndash; Engineering Verification and Debug Log</a>\n<a class="l1" href="#part9">Part IX &ndash; Results Summary</a>\n<a class="l1" href="#part10">Part X &ndash; Conclusions and Further Work</a>\n<a class="l1" href="#refs">References</a>\n<a class="l1" href="#appendices">Appendices</a>\n<a class="l2" href="#appA">Appendix A &ndash; Original MATLAB/Simulink Source Code</a>\n<a class="l2" href="#appB">Appendix B &ndash; Python Physics Engine (htgr_physics.py)</a>\n<a class="l2" href="#appC">Appendix C &ndash; Python Monte Carlo Pipeline (data_pipeline.py)</a>\n<a class="l2" href="#appD">Appendix D &ndash; Python ML Surrogate and Agent (ml_surrogate.py)</a>\n<a class="l2" href="#appE">Appendix E &ndash; Streamlit Dashboard (app.py)</a>\n<a class="l2" href="#appF">Appendix F &ndash; Notebook Styling Utility (build_styled_html.py)</a></div></div>
+
+<div class="page part-break">
+<h1 id="part1">Part I &mdash; Introduction and Motivation</h1>
+
+<h2 id="s1-1">1.1 From a Validated Report to a Running Digital Twin</h2>
+<p>The Imperial HTGR&nbsp;5 and HR&nbsp;5 report, <em>&ldquo;Scaled High Temperature Test Reactor
+Cogeneration for Zero Emission Hybrid-Desalination with Independent Water Heat Rejection&rdquo;</em>
+(Imperial College London, 2026), specified and validated a coupled reactor&ndash;desalination&ndash;heat-rejection
+system in MATLAB and Simulink: 6-group point kinetics, a 3-node fuel/moderator/coolant thermal
+core, a combined Helium Brayton&ndash;Steam Rankine power cycle, DEEP-modelled hybrid desalination
+economics, and a porous-metal thermosyphon heat-rejection system, all validated against literature
+benchmark data and manufacturer specification sheets.</p>
+<p>This report documents a second phase of work: re-implementing the reactor physics core of that
+model as an open, tested, version-controlled Python codebase, extending it with a 1,000-run Monte
+Carlo telemetry generator, and building a scalable machine-learning surrogate &mdash; wrapped in an
+autonomous decision-making agent &mdash; capable of evaluating candidate operating points in
+milliseconds rather than by re-running a stiff ODE solver. The result is a <em>digital twin</em> in
+the strict sense: a lightweight, queryable model of the physical system's behaviour, kept honest by
+being checked against the original physics at every step.</p>
+
+<h2 id="s1-2">1.2 Objectives of This Extension</h2>
+<p>Four objectives were set for this phase of work:</p>
+<ol>
+<li>Translate the report's governing point-kinetics and thermal-hydraulics equations into a Python
+ODE system with no loss of fidelity to the source MATLAB listings, verified rather than assumed
+correct.</li>
+<li>Generate a statistically representative telemetry dataset spanning the plant's realistic
+operating envelope, suitable for training a supervised machine-learning model.</li>
+<li>Train a probabilistic surrogate model that scales to Monte Carlo datasets far larger than
+1,000 rows &mdash; ruling out an exact Gaussian Process on cost grounds alone &mdash; while still
+producing calibrated predictive uncertainty.</li>
+<li>Wrap that surrogate in an autonomous agent capable of clearing, flagging, or rejecting a
+candidate operating point against the reactor's 1650&nbsp;K fuel-temperature safety margin, with a
+stated, inspectable reason in every case.</li>
+</ol>
+
+<h2 id="s1-3">1.3 Relationship to the Original HTGR-5 / HR-5 Report</h2>
+<p>Nothing in the original report's reactor design, thermodynamic analysis, or economic case is
+revisited or re-derived here. Where this report's Python implementation reproduces a result from the
+original report (the 3.51&nbsp;kW condensate-pump power, the 1,700 dry-cooler modules, the
+11,400&nbsp;m&sup3;/day freshwater production, and others), the reproduction is treated as a
+verification exercise: computed independently, then checked against the report's stated value. Two
+such checks surfaced genuine numerical inconsistencies in the source report itself &mdash; both are
+documented candidly in Part VIII rather than silently reconciled.</p>
+<p>The original report's complete MATLAB source code is reproduced in Appendix A of this report for
+direct, side-by-side comparison with the Python translation in Appendices B&ndash;D.</p>
+
+<h2 id="s1-4">1.4 Report Structure</h2>
+<p>Part II gives the digital twin's system architecture. Parts III and IV cover the physics engine
+and the Monte Carlo telemetry generator built on top of it. Part V is the mathematical core of this
+report: a full derivation of the Nystr&ouml;m-approximated, Bayesian-ridge probabilistic surrogate
+that replaces an intractable exact Gaussian Process. Part VI documents the autonomous safety agent
+built on that surrogate. Part VII covers the two interactive artefacts (a Jupyter notebook and a
+Streamlit dashboard) built on the same components. Part VIII is an engineering debug log &mdash; a
+candid, chronological record of what broke during development and how it was diagnosed. Part IX
+consolidates results, and Part X concludes. Appendices A&ndash;F reproduce, in full, every line of
+code referenced in the body of this report.</p>
+</div>
+
+
+<div class="page part-break">
+<h1 id="part2">Part II &mdash; Digital Twin Architecture</h1>
+
+<h2 id="s2-1">2.1 System Architecture and Data Flow</h2>
+<p>The digital twin is organised as four layers, each depending only on the layer beneath it:</p>
+<table class="data">
+<tr><th>Layer</th><th>Module</th><th>Responsibility</th></tr>
+<tr><td>1. Physics</td><td><code>htgr_physics.py</code></td><td>Coupled point-kinetics / 3-node
+thermal-core ODE system, integrated with SciPy</td></tr>
+<tr><td>2. Telemetry</td><td><code>data_pipeline.py</code></td><td>Monte Carlo sampling of
+operating points, physics-engine execution, CoolProp-based turbine work extension</td></tr>
+<tr><td>3. Surrogate + Agent</td><td><code>ml_surrogate.py</code></td><td>Scalable probabilistic
+regression and autonomous safety decision logic</td></tr>
+<tr><td>4. Interfaces</td><td><code>app.py</code>, notebooks</td><td>Interactive dashboard and
+narrative documentation, both querying layer 3 directly</td></tr>
+</table>
+<p class="caption">Table 2.1 &mdash; The four-layer digital twin architecture. Every layer above
+layer&nbsp;1 is a thin, disposable client of the layer beneath it: the physics engine has no
+knowledge of the surrogate, and the surrogate has no knowledge of the dashboard.</p>
+
+<h2 id="s2-2">2.2 Technology Stack</h2>
+<p>NumPy and SciPy (<code>solve_ivp</code>) implement the physics engine; pandas structures the
+Monte Carlo telemetry; CoolProp supplies real helium and water/steam thermophysical properties,
+consistent with the original report's own stated reasoning for adopting CoolProp over Simulink's
+constant-<i>C<sub>p</sub></i> assumption; scikit-learn (<code>Nystroem</code>, <code>BayesianRidge</code>,
+<code>GridSearchCV</code>) implements the surrogate; joblib persists the trained model; Streamlit
+and Plotly implement the interactive dashboard; Jupyter and nbconvert produce the narrative
+notebooks and their styled static exports.</p>
+
+<h2 id="s2-3">2.3 Design Principles</h2>
+<p><b>Translate, then verify.</b> Every equation ported from the original MATLAB listings is checked
+against an independent property of the system it should satisfy &mdash; a fixed point, a conservation
+law, a monotonicity argument &mdash; before being trusted as a foundation for further work (Part
+III.5).</p>
+<p><b>Report gaps, don't paper over them.</b> Where the source report's own figures are internally
+inconsistent (Part VIII), or where this project's physics deliberately diverges from a literal
+reading of the MATLAB listing (Part III.4), the divergence is documented in the code and in this
+report rather than silently resolved in whichever direction looks better.</p>
+<p><b>Prefer a second, independent check over trusting one signal.</b> The autonomous safety agent
+(Part VI) never relies on the surrogate's self-reported uncertainty alone to detect an
+out-of-distribution query; it also runs a deterministic bounds check, because the two failure modes
+the surrogate can exhibit are not equivalent and a single check cannot catch both.</p>
+</div>
+
+
+<div class="page part-break">
+<h1 id="part3">Part III &mdash; Physics Engine Translation</h1>
+
+<h2 id="s3-1">3.1 Governing Equations</h2>
+<p>The point-kinetics power equation and its six delayed-neutron precursor equations (original report
+Eq. 2.1&ndash;2.2, MATLAB <code>Calculate_Kinetics.m</code>, Appendix A of this report):</p>
+<blockquote>
+d<i>P</i>(t)/d<i>t</i> = [(&rho;(t) &minus; &beta;) / &Lambda;]&thinsp;<i>P</i>(t) + &sum;<sub>i=1</sub><sup>6</sup> &lambda;<sub>i</sub><i>C<sub>i</sub></i>(t)<br/>
+d<i>C<sub>i</sub></i>(t)/d<i>t</i> = (&beta;<sub>i</sub>/&Lambda;)&thinsp;<i>P</i>(t) &minus; &lambda;<sub>i</sub><i>C<sub>i</sub></i>(t)
+</blockquote>
+<p>and the 3-node thermal-core energy balances (original report Eq. 2.3&ndash;2.5, MATLAB
+<code>core_thermals.m</code>):</p>
+<blockquote>
+<i>C<sub>f</sub></i>&thinsp;dT<sub>f</sub>/dt = Q<sub>fission</sub> &minus; h<sub>fm</sub>(T<sub>f</sub>&minus;T<sub>m</sub>) &minus; h<sub>fc</sub>(T<sub>f</sub>&minus;T<sub>c</sub>)<br/>
+<i>C<sub>m</sub></i>&thinsp;dT<sub>m</sub>/dt = h<sub>fm</sub>(T<sub>f</sub>&minus;T<sub>m</sub>) &minus; h<sub>mc</sub>(T<sub>m</sub>&minus;T<sub>c</sub>)<br/>
+<i>C<sub>c</sub></i>&thinsp;dT<sub>c</sub>/dt = h<sub>fc</sub>(T<sub>f</sub>&minus;T<sub>c</sub>) + h<sub>mc</sub>(T<sub>m</sub>&minus;T<sub>c</sub>) &minus; 2&#7745;C<sub>p</sub>(T<sub>c</sub>&minus;T<sub>in</sub>)
+</blockquote>
+<p>are combined into a single 10-state coupled system, <i>y</i> = [P, C<sub>1</sub>&hellip;C<sub>6</sub>,
+T<sub>f</sub>, T<sub>m</sub>, T<sub>c</sub>], implemented in full in Appendix B.</p>
+
+<h2 id="s3-2">3.2 Python Implementation via SciPy solve_ivp</h2>
+<p>The coupled system is stiff: the prompt-neutron lifetime &Lambda; = 10&minus;3&nbsp;s and the
+moderator's thermal time constant <i>C<sub>m</sub></i>/h<sub>mc</sub> &asymp; 667&nbsp;s span more
+than five orders of magnitude. An explicit solver (e.g. RK45) would need a timestep set by the
+fastest mode while integrating over a horizon set by the slowest, making it prohibitively expensive.
+<code>HTGRReactorModel.simulate()</code> therefore defaults to SciPy's implicit Radau method, which
+is unconditionally stable for stiff systems of this kind.</p>
+
+<h2 id="s3-3">3.3 Analytic Steady-State Initialisation</h2>
+<p>Rather than reading approximate initial temperatures from a figure, <code>steady_state()</code>
+sets d<i>T<sub>f</sub></i>/dt = d<i>T<sub>m</sub></i>/dt = d<i>T<sub>c</sub></i>/dt = 0 and solves the
+resulting 3&times;3 linear system for [T<sub>f</sub>, T<sub>m</sub>, T<sub>c</sub>] directly:</p>
+<table class="data">
+<tr><th>Row</th><th>[T<sub>f</sub>, T<sub>m</sub>, T<sub>c</sub>] coefficients</th><th>RHS</th></tr>
+<tr><td>Fuel balance</td><td>[h<sub>fm</sub>+h<sub>fc</sub>, &minus;h<sub>fm</sub>, &minus;h<sub>fc</sub>]</td><td>Q<sub>fission</sub></td></tr>
+<tr><td>Moderator balance</td><td>[h<sub>fm</sub>, &minus;(h<sub>fm</sub>+h<sub>mc</sub>), h<sub>mc</sub>]</td><td>0</td></tr>
+<tr><td>Coolant balance</td><td>[h<sub>fc</sub>, h<sub>mc</sub>, &minus;(h<sub>fc</sub>+h<sub>mc</sub>+2&#7745;C<sub>p</sub>)]</td><td>&minus;2&#7745;C<sub>p</sub>T<sub>in</sub></td></tr>
+</table>
+<p class="caption">Table 3.1 &mdash; The steady-state linear system solved by <code>np.linalg.solve</code>
+for any power/flow/inlet-temperature combination, giving a physically self-consistent initial
+condition for every simulation and every Monte Carlo scenario.</p>
+
+<h2 id="s3-4">3.4 The Open-Loop Divergence Finding</h2>
+<p>The MATLAB <code>Calculate_Kinetics.m</code> listing (Appendix A) takes reactivity as a bare
+external argument, <code>rho_in</code>, with no fuel/moderator temperature feedback term &mdash;
+despite the report's own Simulink block diagram (Fig.&nbsp;1 of the original report) visually
+routing T<sub>f</sub> and T<sub>m</sub> into the kinetics block. Translated literally and subjected to
+a sustained positive reactivity step, the coupled system's power &mdash; and therefore temperature
+&mdash; grows without bound: a first end-to-end test run produced a peak fuel temperature of
+5.6&times;10<sup>43</sup>&nbsp;K by t&nbsp;=&nbsp;400&nbsp;s. This is correct point-kinetics physics
+for an open-loop reactivity insertion held constant forever, not a translation error: nothing in the
+governing equation turns power growth over on its own once &rho;(t) is fixed above &beta;'s vicinity.</p>
+<p>An explicit, clearly-labelled Doppler and moderator temperature-feedback term was therefore added
+as the default reactivity model (<code>doppler_feedback_reactivity</code>, Appendix B), documented in
+the code as an addition beyond the literal source listing &mdash; not report data. The literal,
+feedback-free translation remains available as <code>external_step_reactivity</code> for anyone who
+wants the unmodified equations.</p>
+
+<h2 id="s3-5">3.5 Verification by Sanity Check</h2>
+<p>Before the physics engine was trusted as a foundation for the Monte Carlo pipeline, three
+independent checks were run:</p>
+<table class="data">
+<tr><th>Check</th><th>Expected property</th><th>Observed residual / result</th></tr>
+<tr><td>Steady-state fixed point</td><td><code>rhs(0, steady_state())</code> should be the zero vector</td><td>max|dy/dt| &asymp; 1.8&times;10&minus;14</td></tr>
+<tr><td>Precursor equilibrium</td><td>dC<sub>i</sub>/dt = 0 at the algebraic equilibrium</td><td>max residual &asymp; 4.4&times;10&minus;16</td></tr>
+<tr><td>Negative reactivity stability</td><td>power should decay toward zero, not diverge</td><td>confirmed; final power &asymp; 2.3&times;10&minus;6</td></tr>
+</table>
+<p class="caption">Table 3.2 &mdash; Verification results for the coupled ODE system, all at
+floating-point precision.</p>
+
+<h2 id="s3-6">3.6 Validation Against Literature Benchmark Data</h2>
+<p>The original report's Fig.&nbsp;3 validates the thermal-core block's dynamic response against
+literature HTTR data at what appears to be a smaller operating point than this project's scaled 300
+MWth design &mdash; the report's presentation deck resolves this: the real HTTR is a ~30&nbsp;MWth
+research reactor, scaled &times;10 to 300&nbsp;MWth specifically because a 30&nbsp;MWth plant
+produces freshwater for only ~8,000 people against the target city of 80,000, and because the
+project's 27% IRR depends on the economies of scale only the larger design achieves. The presentation
+deck's quantified steady-state validation figures of merit are reproduced below:</p>
+<table class="data">
+<tr><th>Figure of merit</th><th>Steady-state deviation</th><th>Series type</th><th>Validated?</th></tr>
+<tr><td>Outlet coolant temperature</td><td>0.3%</td><td>Time series</td><td>Yes</td></tr>
+<tr><td>Moderator temperature</td><td>~1.1%</td><td>Time series</td><td>Yes</td></tr>
+<tr><td>Average fuel block temperature</td><td>~7.3%</td><td>Time series</td><td>Partially</td></tr>
+<tr><td>Inlet coolant temperature</td><td>&lt;0.5%</td><td>Scalar</td><td>Yes</td></tr>
+</table>
+<p class="caption">Table 3.3 &mdash; Reproduced from the project presentation deck, &sect;4.4.2. The
+fuel node's larger deviation is attributed by the original report to un-tuned PID control producing
+oscillation, not to an energy-balance error &mdash; consistent with the fuel node also being the
+fastest-responding, most oscillatory node in this project's own re-implementation (Part VII.1).</p>
+</div>
+
+
+<div class="page part-break">
+<h1 id="part4">Part IV &mdash; Monte Carlo Telemetry Generation</h1>
+
+<h2 id="s4-1">4.1 Sampling Methodology and Operating Envelope</h2>
+<p><code>data_pipeline.py</code> (Appendix C) samples 1,000 operating points uniformly at random
+within realistic bounds tied directly to the original report's own stated values:</p>
+<table class="data">
+<tr><th>Parameter</th><th>Bounds</th><th>Basis</th></tr>
+<tr><td>Helium mass flow</td><td>78 &ndash; 132 kg/s</td><td>&plusmn;25% around the report's 105 kg/s baseline (&sect;1.3)</td></tr>
+<tr><td>Coolant inlet temperature</td><td>593.15 &ndash; 653.15 K</td><td>&plusmn;30 K around the 350&deg;C compressor-outlet estimate (Table 9)</td></tr>
+<tr><td>Reactivity step (absolute)</td><td>&minus;0.0030 &ndash; +0.0030</td><td>Comfortably inside &plusmn;&beta;<sub>total</sub> = 0.0075</td></tr>
+<tr><td>Reactivity step timing</td><td>50 &ndash; 150 s</td><td>Centred on the report's t = 100 s validation step</td></tr>
+<tr><td>Turbine inlet pressure</td><td>6.3 &ndash; 7.7 MPa</td><td>Around the report's 70 bar reactor-outlet pressure</td></tr>
+<tr><td>Turbine back pressure</td><td>3.8 &ndash; 5.0 MPa</td><td>Around the report's 45 bar gas-turbine-exit pressure</td></tr>
+<tr><td>Turbine isentropic efficiency</td><td>0.85 &ndash; 0.92</td><td>Typical industrial range (not given numerically in the report)</td></tr>
+</table>
+<p class="caption">Table 4.1 &mdash; Monte Carlo sampling bounds. Each scenario's starting state is
+derived via <code>steady_state()</code> for that scenario's own flow/inlet-temperature combination
+(Part III.3) rather than a shared, potentially inconsistent initial condition.</p>
+
+<h2 id="s4-2">4.2 Helium Turbine Work Extension</h2>
+<p>Each scenario's post-transient reactor-outlet gas state is passed through
+<code>helium_turbine_work()</code>, a direct Python/CoolProp port of the original report's
+<code>helium_turbine.m</code> (Appendix A): an isentropic expansion from (T<sub>in</sub>, P<sub>in</sub>)
+to P<sub>back</sub> at the sampled isentropic efficiency, using real CoolProp helium enthalpy and
+entropy lookups rather than an ideal-gas assumption.</p>
+
+<h2 id="s4-3">4.3 Dataset Characteristics</h2>
+<p>All 1,000 sampled scenarios converged: zero ODE solver failures, zero missing turbine-work
+values, in approximately 113 seconds of wall-clock time. The resulting <code>htgr_telemetry.csv</code>
+carries 23 columns per row &mdash; the 7 sampled inputs, solver metadata, initial/peak/final
+temperatures for all three thermal nodes, final normalised power, and the two turbine outputs &mdash;
+and forms the training set for Part V's surrogate model.</p>
+</div>
+
+
+<div class="page part-break">
+<h1 id="part5">Part V &mdash; Scalable Probabilistic Surrogate Modelling</h1>
+
+<h2 id="s5-1">5.1 The O(N&sup3;) Bottleneck of Exact Gaussian Process Regression</h2>
+<p>A Gaussian Process (GP) is the natural first choice for this problem: it is a distribution over
+functions with calibrated predictive uncertainty built in in by construction. Given N training
+points, its posterior mean and variance at a query point x<sub>&lowast;</sub> are</p>
+<blockquote>
+&mu;<sub>&lowast;</sub>(x) = k(x)<sup>&#8868;</sup> (K + &sigma;<sub>n</sub><sup>2</sup>I)<sup>&minus;1</sup> y<br/>
+&sigma;<sub>&lowast;</sub><sup>2</sup>(x) = k(x,x) &minus; k(x)<sup>&#8868;</sup> (K + &sigma;<sub>n</sub><sup>2</sup>I)<sup>&minus;1</sup> k(x)
+</blockquote>
+<p>where K &isin; &#8477;<sup>N&times;N</sup> is the Gram matrix (K<sub>ij</sub> = k(x<sub>i</sub>,x<sub>j</sub>)
+for the RBF kernel), k(x) &isin; &#8477;<sup>N</sup> is the vector of kernel evaluations against every
+training point, and &sigma;<sub>n</sub><sup>2</sup> is observation noise. The bottleneck is
+(K+&sigma;<sub>n</sub><sup>2</sup>I)<sup>&minus;1</sup>: computing it exactly via Cholesky
+factorisation costs O(N&sup3;) time and O(N&sup2;) memory, plus O(N) per prediction for the mean and
+O(N&sup2;) for the variance. At N&nbsp;=&nbsp;800 (this project's training split) that cost is
+trivial &mdash; but the point of this architecture is to survive a Monte Carlo sweep one or two
+orders of magnitude larger than 1,000 runs without a rewrite. At N&nbsp;=&nbsp;50,000, O(N&sup3;)
+&asymp; 1.25&times;10<sup>14</sup> floating-point operations: computationally dead on arrival.</p>
+
+<h2 id="s5-2">5.2 The Nystr&ouml;m Kernel Approximation</h2>
+<p>The Nystr&ouml;m method replaces the full kernel with a low-rank approximation built from m
+&laquo; N landmark points sampled from the training set:</p>
+<blockquote>K &asymp; K<sub>N,m</sub> K<sub>m,m</sub><sup>+</sup> K<sub>m,N</sub></blockquote>
+<p>where K<sub>m,m</sub> &isin; &#8477;<sup>m&times;m</sup> is the small Gram matrix among the m
+landmarks and K<sub>N,m</sub> &isin; &#8477;<sup>N&times;m</sup> holds the kernel evaluations between
+every training point and those landmarks. scikit-learn's <code>Nystroem</code> transformer
+eigendecomposes K<sub>m,m</sub> = U&Lambda;U<sup>&#8868;</sup> and builds an explicit
+finite-dimensional feature map &phi;: &#8477;<sup>d</sup> &rarr; &#8477;<sup>m</sup>:</p>
+<blockquote>&phi;(x) = &Lambda;<sup>&minus;1/2</sup>U<sup>&#8868;</sup>k<sub>m</sub>(x), &nbsp;&nbsp;&nbsp;&nbsp;
+k(x,x&prime;) &asymp; &phi;(x)<sup>&#8868;</sup>&phi;(x&prime;)</blockquote>
+<p>which converts nonlinear kernel regression into ordinary linear regression in an m-dimensional
+space. Every downstream computation &mdash; including the predictive uncertainty &mdash; now scales
+with m, not N.</p>
+
+<h2 id="s5-3">5.3 Bayesian Ridge Regression on Nystr&ouml;m Features</h2>
+<p>With an explicit &phi;(x), <code>BayesianRidge</code> fits a linear model with Gaussian priors on
+both the weights and the observation noise:</p>
+<blockquote>y = &phi;(x)<sup>&#8868;</sup>w + &epsilon;, &nbsp;&nbsp; &epsilon; ~ &Nopf;(0, &tau;<sup>&minus;1</sup>), &nbsp;&nbsp;
+w ~ &Nopf;(0, &alpha;<sup>&minus;1</sup>I)</blockquote>
+<p>Gamma hyperpriors on the noise precision &tau; and weight precision &alpha; are resolved by
+evidence maximisation (type-II maximum likelihood / empirical Bayes) directly from the training
+data &mdash; no manually-tuned regularisation constant. Given &Phi; &isin; &#8477;<sup>N&times;m</sup>
+(the stacked Nystr&ouml;m features), the posterior over w is closed-form:</p>
+<blockquote>&Sigma;<sub>w</sub> = (&alpha;I + &tau;&thinsp;&Phi;<sup>&#8868;</sup>&Phi;)<sup>&minus;1</sup>, &nbsp;&nbsp;&nbsp;&nbsp;
+&mu;<sub>w</sub> = &tau;&thinsp;&Sigma;<sub>w</sub>&thinsp;&Phi;<sup>&#8868;</sup>y</blockquote>
+<p>Forming &Phi;<sup>&#8868;</sup>&Phi; costs O(Nm&sup2;); inverting the resulting m&times;m matrix
+costs O(m&sup3;) &mdash; independent of N. For a new query point x<sub>&lowast;</sub>, with
+&phi;<sub>&lowast;</sub> = &phi;(x<sub>&lowast;</sub>):</p>
+<blockquote>&mu;<sub>&lowast;</sub> = &phi;<sub>&lowast;</sub><sup>&#8868;</sup>&mu;<sub>w</sub>
+&nbsp;&nbsp;(predictive mean) &nbsp;&nbsp;&nbsp;&nbsp;
+&sigma;<sub>&lowast;</sub><sup>2</sup> = &tau;<sup>&minus;1</sup> + &phi;<sub>&lowast;</sub><sup>&#8868;</sup>&Sigma;<sub>w</sub>&phi;<sub>&lowast;</sub>
+&nbsp;&nbsp;(predictive variance)</blockquote>
+<p>This is exactly what <code>pipeline.predict(X, return_std=True)</code> returns in
+<code>ml_surrogate.py</code> (Appendix D) &mdash; and its correct kwarg passthrough through the
+<code>Nystroem</code> transform step to <code>BayesianRidge.predict()</code> was verified in an
+isolated smoke test <em>before</em> the multi-minute grid search was run on top of it (Part
+VIII.3).</p>
+
+<h2 id="s5-4">5.4 Complexity Comparison</h2>
+<table class="data">
+<tr><th></th><th>Exact GP</th><th>Nystr&ouml;m + Bayesian ridge (this project)</th></tr>
+<tr><td>Training time</td><td>O(N&sup3;)</td><td>O(Nm&sup2; + m&sup3;)</td></tr>
+<tr><td>Prediction time (mean)</td><td>O(N)</td><td>O(m)</td></tr>
+<tr><td>Prediction time (variance)</td><td>O(N&sup2;)</td><td>O(m&sup2;)</td></tr>
+<tr><td>Memory</td><td>O(N&sup2;)</td><td>O(Nm + m&sup2;)</td></tr>
+<tr><td>Uncertainty quality</td><td>Exact, for the chosen kernel</td><td>Approximate &mdash; see &sect;5.7</td></tr>
+</table>
+<p class="caption">Table 5.1 &mdash; With N=800 and m&le;300 the gap is already meaningful; it becomes
+decisive with every additional order of magnitude of Monte Carlo data.</p>
+
+<h2 id="s5-5">5.5 Hyperparameter Optimisation</h2>
+<p>Each of the two target variables (<code>peak_fuel_temp_K</code>, <code>turbine_work_MW</code>)
+gets its own independently-fitted pipeline, with 5-fold cross-validated grid search over the
+Nystr&ouml;m RBF bandwidth &gamma; &isin; {10<sup>&minus;3</sup>, 10<sup>&minus;2</sup>,
+10<sup>&minus;1</sup>, 1} and landmark count m &isin; {100, 200, 300}, scored by R&sup2;.</p>
+
+<h2 id="s5-6">5.6 Model Evaluation and Calibration</h2>
+<table class="data">
+<tr><th></th><th>Peak Fuel Temperature</th><th>Turbine Work Output</th></tr>
+<tr><td>Test R&sup2;</td><td>0.9946</td><td>1.0000</td></tr>
+<tr><td>Test RMSE</td><td>4.85 K</td><td>0.0033 MW</td></tr>
+<tr><td>Mean predictive &sigma;</td><td>4.88 K</td><td>0.0025 MW</td></tr>
+<tr><td>95% CI coverage (&plusmn;2&sigma;)</td><td>96.5%</td><td>92.0%</td></tr>
+<tr><td>Best hyperparameters</td><td>&gamma;=0.001, m=100</td><td>&gamma;=0.001, m=300</td></tr>
+</table>
+<p class="caption">Table 5.2 &mdash; Held-out test-set performance, from a 5-fold cross-validated grid
+search on an 80/20 train/test split (random_state=0).</p>
+<p><code>turbine_work_MW</code> fitting to R&sup2;&nbsp;&asymp;&nbsp;1.0000 does not indicate
+overfitting or data leakage: the telemetry is generated by a deterministic simulator with no
+injected observation noise, and turbine work is a smooth composition of the physics engine's output
+through CoolProp's helium enthalpy relations, so a sufficiently flexible model fitting it near-exactly
+is the expected outcome, not a red flag. The 96.5%/92.0% coverage figures are reported as measured,
+not asserted as perfectly calibrated &mdash; the nominal target for a &plusmn;2&sigma; interval is
+95%.</p>
+
+<h2 id="s5-7">5.7 The Honest Limitation of the Approximation</h2>
+<p>&phi; is built from a fixed, global set of m landmarks chosen once at training time. An exact
+RBF-kernel GP's uncertainty is <em>guaranteed by construction</em> to widen with distance from
+training data, because k(x<sub>&lowast;</sub>, x<sub>i</sub>) &rarr; 0 for a stationary kernel as
+distance grows. A Nystr&ouml;m-approximated linear model offers no such guarantee: nothing forces
+&phi;<sub>&lowast;</sub><sup>&#8868;</sup>&Sigma;<sub>w</sub>&phi;<sub>&lowast;</sub> to grow smoothly
+outside the span of the training landmarks. This is a structural limitation of the chosen
+architecture, not a footnote, and it directly motivates the second, independent check built into the
+autonomous agent in Part VI.</p>
+</div>
+
+
+<div class="page part-break">
+<h1 id="part6">Part VI &mdash; HTGRAgent: An Autonomous Safety Decision Layer</h1>
+
+<h2 id="s6-1">6.1 Motivation and Design Philosophy</h2>
+<p>A trained surrogate that returns a mean and a standard deviation is not, by itself, a safety
+system: something still has to decide what those two numbers <em>mean</em> for a given candidate
+operating point. <code>HTGRAgent</code> (Appendix D) is a plain-Python decision layer performing
+that translation, structurally analogous to the original report's own reactor control philosophy
+(Part &sect;8.1 of the original report: automatic shutdown at 90% prompt criticality) &mdash; both
+are automated systems that continuously check an operating point against a hard physical limit and
+intervene before it is crossed, one implemented in a physical control loop, the other in software.</p>
+
+<h2 id="s6-2">6.2 Conditional Decision Logic</h2>
+<p>Every call to <code>HTGRAgent.evaluate(scenario)</code> runs three independent checks, each
+capable of escalating the verdict from NOMINAL toward UNCERTAIN or UNSAFE:</p>
+<table class="data">
+<tr><th>#</th><th>Check</th><th>Trigger condition</th><th>Escalates to</th></tr>
+<tr><td>1</td><td>Extrapolation guard</td><td>Any of the 7 input features lies outside the exact
+[min, max] range observed during training</td><td>UNCERTAIN</td></tr>
+<tr><td>2</td><td>Uncertainty threshold</td><td>Predictive &sigma; on peak_fuel_temp_K exceeds
+mean(test &sigma;) + 2&middot;std(test &sigma;), a data-driven cutoff computed once after
+training</td><td>UNCERTAIN</td></tr>
+<tr><td>3</td><td>Safety margin</td><td>&mu; + z&sigma; (z=2) on peak_fuel_temp_K exceeds
+1650&nbsp;K</td><td>UNSAFE (overrides all)</td></tr>
+</table>
+<p class="caption">Table 6.1 &mdash; The agent's three-check decision logic, implemented in
+<code>HTGRAgent.evaluate()</code>, Appendix D.</p>
+<p>Check 3 deliberately uses the upper confidence bound rather than the raw predictive mean: a
+scenario whose mean prediction sits under 1650&nbsp;K but whose uncertainty band pushes the credible
+upper bound past it is still flagged unsafe.</p>
+
+<h2 id="s6-3">6.3 The Deterministic Extrapolation Guard</h2>
+<p>As established in Part V.7, the surrogate's self-reported &sigma; is not guaranteed to grow with
+distance from the training distribution the way an exact GP's would. Check&nbsp;1 therefore does not
+rely on statistics at all &mdash; it is a literal bounds comparison against
+<code>HTGRSurrogate.feature_bounds</code>, computed once from the training data's exact per-feature
+minimum and maximum. Any query point outside those bounds is extrapolation by definition, regardless
+of what the model's &sigma; happens to report for it.</p>
+
+<h2 id="s6-4">6.4 Root-Cause Recommendation Engine</h2>
+<p>When the verdict is not NOMINAL, <code>_recommend()</code> generates concrete adjustments tied
+directly to the <code>core_thermals.m</code> energy balance, not a black-box output:</p>
+<table class="data">
+<tr><th>Trigger</th><th>Recommendation</th><th>Physical mechanism</th></tr>
+<tr><td>Flow below the training midpoint</td><td>Increase helium_mass_flow_kgs</td><td>More
+convective heat removal via the 2&#7745;C<sub>p</sub>(T<sub>c</sub>&minus;T<sub>in</sub>) term</td></tr>
+<tr><td>rho_insertion &gt; 0</td><td>Reduce the positive reactivity step</td><td>Less fission heat
+generated (Q<sub>fission</sub> = P&middot;Q<sub>nominal</sub>)</td></tr>
+<tr><td>Inlet temperature above the training midpoint</td><td>Lower coolant_inlet_temp_K</td><td>Larger
+driving &Delta;T for heat removal</td></tr>
+</table>
+
+<h2 id="s6-5">6.5 Demonstration Scenarios</h2>
+<p>Two scenarios, imported as module-level constants (<code>SAFE_SCENARIO_DEMO</code>,
+<code>UNSAFE_SCENARIO_DEMO</code>) so the CLI demo, the notebook, and the dashboard can never drift
+apart:</p>
+<table class="data">
+<tr><th>Scenario</th><th>Key inputs</th><th>Predicted peak fuel temp</th><th>Verdict</th></tr>
+<tr><td>Moderate, in-distribution</td><td>110 kg/s, 605 K, &minus;0.0005 &rho;</td><td>1485.6 K
+(&sigma;=4.7)</td><td><b>NOMINAL</b></td></tr>
+<tr><td>Low flow, hot inlet, strong positive &rho;</td><td>70 kg/s (below training floor), 652 K,
++0.0029 &rho;</td><td>1806.1 K (&sigma;=6.4)</td><td><b>UNSAFE</b> &mdash; all three checks fire
+simultaneously</td></tr>
+</table>
+</div>
+
+
+<div class="page part-break">
+<h1 id="part7">Part VII &mdash; Interactive Systems</h1>
+
+<h2 id="s7-1">7.1 The Systems Textbook Notebook</h2>
+<p><code>notebooks/HTGR_Systems_Textbook.ipynb</code> is a seventeen-chapter, six-part walkthrough of
+the entire engineering chain &mdash; reactor down-selection, point kinetics, thermal-hydraulics,
+coolant fluid mechanics, the combined Brayton&ndash;Rankine cycle, MED desalination, DEEP economics,
+CO&sub2; sustainability, reactor safety systems, and the independent heat-rejection system &mdash;
+built from both the original report and its accompanying presentation deck, with every worked
+example independently recomputed and checked against the source material's own stated results before
+being written into the notebook. Two genuine source-document numerical inconsistencies were caught
+this way (Part VIII.5) rather than silently reconciled.</p>
+
+<h2 id="s7-2">7.2 The Streamlit Operating-Point Explorer</h2>
+<p><code>app.py</code> (Appendix E) is a live dashboard over the trained surrogate: three sliders
+(helium mass flow, coolant inlet temperature, reactivity step in dollars, converted internally via
+&rho; = dollars &times; &beta;<sub>total</sub>), metric cards for predicted peak fuel temperature and
+turbine work with &plusmn;2&sigma; bands, a Plotly gauge visualising the operating point against the
+1650&nbsp;K safety margin, and a live <code>HTGRAgent</code> diagnostic panel &mdash; the same
+decision logic documented in Part VI, queried interactively rather than from a fixed demo script.</p>
+
+<h2 id="s7-3">7.3 Styled Static Exports</h2>
+<p>Because GitHub's hosted <code>.ipynb</code> renderer sanitises embedded CSS, notebook typography
+and background colour cannot be controlled from within the notebook file itself when viewed there.
+<code>scripts/build_styled_html.py</code> (Appendix F) works around this by post-processing
+nbconvert's own HTML export &mdash; a file this project fully owns &mdash; with the same
+Times-New-Roman-on-parchment stylesheet used throughout this report, guaranteeing identical rendering
+in any browser regardless of what a third-party viewer's sanitisation rules permit.</p>
+</div>
+
+
+<div class="page part-break">
+<h1 id="part8">Part VIII &mdash; Engineering Verification and Debug Log</h1>
+<p>Kept here deliberately, in full, as a record of what broke during development, how it was
+diagnosed, and how it was fixed &mdash; rather than cleaned out of the project history.</p>
+
+<h3>VIII.1 Open-loop reactivity divergence (~10&sup4;&sup3; K)</h3>
+<p><b>Symptom.</b> The first end-to-end run of the coupled ODE produced a peak fuel temperature of
+56,397,188,346,951,049,257,910,745,257,165,469,201,203,200&nbsp;K by t=400&nbsp;s.
+<b>Root cause.</b> Correct physics, not a code defect: a constant positive reactivity insertion below
+prompt-critical still produces unbounded exponential power growth on a stable reactor period unless
+something external to the equation forces &rho; back down (Part III.4). <b>Fix.</b> Added an
+explicit Doppler/moderator feedback term as the default reactivity model, documented as an addition
+beyond the literal MATLAB listing. <b>Lesson.</b> Translate the equations exactly, then test the
+equations &mdash; a perfect translation of an incomplete model is still an incomplete model.</p>
+
+<h3>VIII.2 A joblib pickling bug with two heads</h3>
+<p><b>Symptom.</b> <code>jupyter nbconvert --execute</code> failed loading the trained surrogate:
+<code>AttributeError: Can't get attribute 'TargetModel' on &lt;module '__main__'&gt;</code>.
+<b>Root cause.</b> Running <code>python src/ml_surrogate.py</code> directly executes the module as
+<code>__main__</code>; joblib pickles the <code>TargetModel</code>/<code>HTGRSurrogate</code>
+dataclasses under whatever module they were defined in at pickle time. <b>Second head.</b> Adding
+<code>app.py</code> with <code>from src.ml_surrogate import ...</code> introduced a third possible
+module path, meaning one saved artefact could only ever satisfy one consumer at a time. <b>Real
+fix.</b> Standardised the whole project on <code>src.ml_surrogate</code> as the single canonical
+import path, and added a self-detecting guard inside <code>main()</code> that prints the exact
+failure mode and the correct regeneration command if triggered, rather than silently saving a broken
+artefact. <b>Lesson.</b> A bug that reproduces under a different trigger is not a new bug &mdash; fix
+the class of failure, not the instance.</p>
+
+<h3>VIII.3 Verifying an API before building on it</h3>
+<p><b>Risk.</b> The entire uncertainty-quantification story (Part V) depends on
+<code>Pipeline.predict(X, return_std=True)</code> correctly forwarding <code>return_std</code>
+through a <code>Nystroem</code> transform step to <code>BayesianRidge.predict()</code> &mdash;
+documented behaviour, not something to assume across scikit-learn versions without checking.
+<b>Action.</b> A ten-line isolated smoke test confirmed the kwarg passthrough before the multi-minute
+grid search was run on top of it. <b>Lesson.</b> Verify a load-bearing assumption in isolation before
+building the full system on it &mdash; a broken assumption found after a five-minute grid search is a
+far more expensive bug to diagnose.</p>
+
+<h3>VIII.4 A Mermaid rendering failure and a Markdown/LaTeX collision</h3>
+<p>Two independent presentation-layer bugs surfaced during documentation: a Mermaid diagram using the
+less-portable cylinder/database node shape failed to render on GitHub with
+<code>Cannot read properties of undefined (reading 'render')</code>, fixed by reverting to a plain
+rectangle node consistent with every other node in the project's diagrams; and the conventional
+&ldquo;star&rdquo; notation x<sub>&lowast;</sub>, written as a bare <code>*</code> inside <code>$$&hellip;$$</code>
+LaTeX blocks, was being consumed by Markdown's emphasis parser before KaTeX ever saw it, corrupting
+subscripts such as &sigma;<sub>&lowast;</sub><sup>2</sup>. Fixed by replacing every literal
+<code>*</code> inside a math span with the LaTeX command <code>\ast</code>, which contains no literal
+asterisk character for Markdown to misinterpret.</p>
+
+<h3>VIII.5 Source-document numerical discrepancies, found and not silently reconciled</h3>
+<p>Two independent inconsistencies in the original report's own figures were found while
+independently recomputing its worked examples for the systems-textbook notebook: the heat-rejection
+condensate pump's itemised fitting-loss coefficients (6 elbows + 2 valves + 1 check valve) sum to
+&Sigma;K&nbsp;=&nbsp;5.0, but the report's own downstream result (h<sub>m</sub>&nbsp;=&nbsp;2.98&nbsp;m)
+only reproduces using &Sigma;K&nbsp;=&nbsp;6.5 as stated; and the report's Table&nbsp;8 states a
+heat-rejection footprint of 60,214&nbsp;m&sup2;, while independently recomputing it from the given
+Kelvion module dimensions and the report's own module count gives &asymp;6,076&nbsp;m&sup2;,
+matching the accompanying presentation deck's 6,021.4&nbsp;m&sup2; almost exactly &mdash; strongly
+suggesting a misplaced decimal point in the report table rather than a genuine order-of-magnitude
+design difference. Both are flagged explicitly in the systems-textbook notebook rather than silently
+picked one way or the other.</p>
+</div>
+
+
+<div class="page part-break">
+<h1 id="part9">Part IX &mdash; Results Summary</h1>
+<table class="data">
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Monte Carlo scenarios sampled / converged</td><td>1,000 / 1,000</td></tr>
+<tr><td>Solver failures</td><td>0</td></tr>
+<tr><td>peak_fuel_temp_K &mdash; test R&sup2; / RMSE / 95% coverage</td><td>0.9946 / 4.85 K / 96.5%</td></tr>
+<tr><td>turbine_work_MW &mdash; test R&sup2; / RMSE / 95% coverage</td><td>1.0000 / 0.0033 MW / 92.0%</td></tr>
+<tr><td>Training-cost scaling vs. exact GP</td><td>O(Nm&sup2;+m&sup3;) vs. O(N&sup3;)</td></tr>
+<tr><td>HTGRAgent demo &mdash; in-distribution scenario</td><td>NOMINAL, 1485.6 K predicted</td></tr>
+<tr><td>HTGRAgent demo &mdash; out-of-distribution scenario</td><td>UNSAFE, 1806.1 K predicted, all 3 checks fired</td></tr>
+<tr><td>Physics-engine sanity-check residuals</td><td>&le; 1.8&times;10&minus;14 (floating-point precision)</td></tr>
+<tr><td>Source-document discrepancies independently found and flagged</td><td>2</td></tr>
+</table>
+</div>
+
+
+<div class="page part-break">
+<h1 id="part10">Part X &mdash; Conclusions and Further Work</h1>
+<p>This report has documented the construction of a Python digital twin over the Imperial HTGR&nbsp;5
+/ HR&nbsp;5 reactor model: a verified, stiff-ODE physics engine translated one-to-one from the
+original MATLAB listings (with one clearly-labelled addition needed to make the model physically
+stable); a 1,000-run Monte Carlo telemetry generator extending that physics with real CoolProp
+thermodynamics; a scalable Nystr&ouml;m-plus-Bayesian-ridge probabilistic surrogate replacing an
+intractable exact Gaussian Process at a small, honestly-stated cost in uncertainty-quality
+guarantees; and an autonomous safety agent built with two independent, complementary checks rather
+than trusting a single fallible signal.</p>
+<p>Further work follows directly from the limitations documented throughout this report: PID
+controller tuning to reduce the fuel/moderator oscillation noted in Part III.6; replacing the
+illustrative Doppler/moderator feedback coefficients of Part III.4 with measured values, should they
+become available; extending the Monte Carlo sampling envelope and retraining the surrogate once a
+larger telemetry dataset makes the O(N&sup3;) argument of Part V.1 bite in practice rather than in
+principle; and resolving the two source-document numerical discrepancies of Part VIII.5 with the
+original report's authors.</p>
+</div>
+
+
+<div class="page part-break ref-list">
+<h1 id="refs">References</h1>
+<p>[1] Imperial HTGR 5 and HR 5 Team. <i>Scaled High Temperature Test Reactor Cogeneration for Zero
+Emission Hybrid-Desalination with Independent Water Heat Rejection.</i> Imperial College London,
+2026. (This report's primary source; reproduced in Appendix A.)</p>
+<p>[2] Imperial Team 5. <i>Scaled High Temperature Test Reactor Cogeneration for Zero-Emission
+Hybrid Desalination with Water Independent Heat Rejection</i> (final presentation). Imperial College
+London / Rolls-Royce, 2026.</p>
+<p>[3] Williams, C.K.I. and Seeger, M. &ldquo;Using the Nystr&ouml;m Method to Speed Up Kernel
+Machines.&rdquo; <i>Advances in Neural Information Processing Systems</i> 13, 2001.</p>
+<p>[4] Rasmussen, C.E. and Williams, C.K.I. <i>Gaussian Processes for Machine Learning.</i> MIT
+Press, 2006.</p>
+<p>[5] MacKay, D.J.C. &ldquo;Bayesian Interpolation.&rdquo; <i>Neural Computation</i> 4(3), 415&ndash;447,
+1992. (Evidence-maximisation basis for scikit-learn's <code>BayesianRidge</code>.)</p>
+<p>[6] Pedregosa, F. et al. &ldquo;Scikit-learn: Machine Learning in Python.&rdquo; <i>Journal of
+Machine Learning Research</i> 12, 2825&ndash;2830, 2011.</p>
+<p>[7] Virtanen, P. et al. &ldquo;SciPy 1.0: Fundamental Algorithms for Scientific Computing in
+Python.&rdquo; <i>Nature Methods</i> 17, 261&ndash;272, 2020.</p>
+<p>[8] Bell, I.H., Wronski, J., Quoilin, S., and Lemort, V. &ldquo;Pure and Pseudo-pure Fluid
+Thermophysical Property Evaluation and the Open-Source Thermophysical Property Library CoolProp.&rdquo;
+<i>Industrial &amp; Engineering Chemistry Research</i> 53(6), 2498&ndash;2508, 2014.</p>
+<p>[9] McKinney, W. &ldquo;Data Structures for Statistical Computing in Python.&rdquo; <i>Proceedings
+of the 9th Python in Science Conference</i>, 2010.</p>
+</div>
+
+
+<div class="page part-break appendix-section">
+<h1 id="appendices">Appendices</h1>
+<p>Every appendix below reproduces complete, unedited source code: Appendix A is transcribed verbatim
+from the original Imperial HTGR&nbsp;5 / HR&nbsp;5 report's own appendices (MATLAB, Simulink Coder
+compatible); Appendices B&ndash;F are read directly from this project's source files at the time this
+report was generated, so they are guaranteed to match the repository exactly.</p>
+</div>
+
+
+<div class="page appendix-section">
+<h2 id="appA">Appendix A &mdash; Original MATLAB/Simulink Source Code</h2>
+<p>Reproduced from the Imperial HTGR&nbsp;5 and HR&nbsp;5 report, Appendix B (Listings 1&ndash;6) and
+Appendix D (Listing 7). This is the exact code that <code>htgr_physics.py</code> (Appendix B of this
+report) and <code>data_pipeline.py</code>'s <code>helium_turbine_work()</code> (Appendix C) are
+direct translations of.</p>
+
+<div class="codecap">A.1 &mdash; core_thermals.m (3-node thermal core)</div>
+<pre class="code"><code>function [ dTf_dt , dTm_dt , dTc_dt ] = core_thermals ( Tf , Tm , Tc , Q_fission , T_c_in , mdot )
+% This function calculates the derivatives for the 3-node HTTR thermal model.
+
+% Thermal Capacities (J/K)
+Cf = 5.0e6;   % Fuel thermal capacity
+Cm = 1.0e8;   % Moderator (graphite) thermal capacity
+Cc = 1.0e6;   % Coolant (helium) thermal capacity
+
+% Heat Transfer Coefficients (W/K)
+h_fm = 2.0e5; % Fuel-to-Moderator
+h_fc = 4.0e5; % Fuel-to-Coolant
+h_mc = 1.5e5; % Moderator-to-Coolant
+
+% Coolant Properties
+cp = 5193;    % Specific heat of Helium (J/kg-K)
+
+% Equation 1: Fuel Node
+dTf_dt = (Q_fission - h_fm*(Tf - Tm) - h_fc*(Tf - Tc)) / Cf;
+
+% Equation 2: Moderator Node
+dTm_dt = (h_fm*(Tf - Tm) - h_mc*(Tm - Tc)) / Cm;
+
+% Equation 3: Coolant Node
+dTc_dt = (h_fc*(Tf - Tc) + h_mc*(Tm - Tc) - 2*mdot*cp*(Tc - T_c_in)) / Cc;
+
+end</code></pre>
+
+<div class="codecap">A.2 &mdash; Calculate_Kinetics.m (6-group point kinetics)</div>
+<pre class="code"><code>function [dP_dt, dC1_dt, dC2_dt, dC3_dt, dC4_dt, dC5_dt, dC6_dt, Q_fission] = ...
+    Calculate_Kinetics(P, C1, C2, C3, C4, C5, C6, rho_in)
+
+% 1. DEFINE CONSTANTS (Standard U-235 values)
+
+% Delayed Neutron Fractions (beta_i) for 6 groups
+beta_i = [0.00025, 0.00138, 0.00122, 0.00266, 0.00164, 0.00035];
+
+% Total delayed neutron fraction
+beta_total = sum(beta_i); % This is 0.0075
+
+% Decay Constants (lambda_i, in 1/s)
+lambda = [0.0766, 0.2825, 0.6154, 1.634, 5.176, 16.72];
+
+% Prompt Neutron Lifetime (s). For HTTRs (graphite), this is "long".
+Lambda = 1.0e-3; % 0.001 seconds
+
+% Nominal Thermal Power (Watts)
+% This scales our normalized power (P) to real power (Q)
+Q_nominal = 300e6; % 300 MW
+
+% 2. CALCULATE DERIVATIVES (THE ODEs)
+
+% First, calculate the "sum(lambda_i * C_i)" part
+sum_lambda_C = lambda(1)*C1 + lambda(2)*C2 + lambda(3)*C3 + ...
+               lambda(4)*C4 + lambda(5)*C5 + lambda(6)*C6;
+
+% Equation 1: Power (Neutron Population)
+dP_dt = ((rho_in - beta_total) / Lambda) * P + sum_lambda_C;
+
+% Equations 2-7: Precursor Concentrations
+dC1_dt = (beta_i(1) / Lambda) * P - lambda(1) * C1;
+dC2_dt = (beta_i(2) / Lambda) * P - lambda(2) * C2;
+dC3_dt = (beta_i(3) / Lambda) * P - lambda(3) * C3;
+dC4_dt = (beta_i(4) / Lambda) * P - lambda(4) * C4;
+dC5_dt = (beta_i(5) / Lambda) * P - lambda(5) * C5;
+dC6_dt = (beta_i(6) / Lambda) * P - lambda(6) * C6;
+
+% 3. CALCULATE THE OUTPUT THERMAL POWER
+% The block's output is the normalized power (P) scaled by the nominal power.
+Q_fission = P * Q_nominal;
+
+end</code></pre>
+
+<div class="codecap">A.3 &mdash; helium_turbine.m (isentropic helium expansion, CoolProp)</div>
+<pre class="code"><code>function [P_out, T_out, h_out, m_dot_out, Work_Out] = helium_turbine(T_in, P_in, P_back, m_dot, eta_is)
+
+coder.extrinsic('py.CoolProp.CoolProp.PropsSI');
+
+P_out = 0.0; T_out = 0.0; h_out = 0.0; m_dot_out = 0.0; Work_Out = 0.0;
+
+fluid = 'Helium';
+
+if T_in &lt;= 10 || P_in &lt;= 1000 || m_dot &lt;= 0
+    P_out = double(P_in); T_out = double(T_in); m_dot_out = double(m_dot);
+else
+    % Initialize variables as doubles before extrinsic calls
+    h_in = 0.0;
+    s_in = 0.0;
+    h_out_s = 0.0;
+    T_out_val = 0.0;
+
+    h_in = double(py.CoolProp.CoolProp.PropsSI('H', 'T', double(T_in), 'P', double(P_in), fluid));
+    s_in = double(py.CoolProp.CoolProp.PropsSI('S', 'T', double(T_in), 'P', double(P_in), fluid));
+
+    h_s_val = py.CoolProp.CoolProp.PropsSI('H', 'S', s_in, 'P', double(P_back), fluid);
+    h_out_s = double(h_s_val);
+
+    h_out_actual = h_in - (double(eta_is) * (h_in - h_out_s));
+    h_out = double(h_out_actual);
+
+    temp_T = py.CoolProp.CoolProp.PropsSI('T', 'H', h_out, 'P', double(P_back), fluid);
+    T_out = double(temp_T);
+
+    P_out = double(P_back);
+    m_dot_out = double(m_dot);
+    Work_Out = double(m_dot) * (h_in - h_out);
+end
+
+end</code></pre>
+
+<div class="codecap">A.4 &mdash; steam_turbine_measured.m (isentropic steam expansion, CoolProp)</div>
+<pre class="code"><code>function [W_turb, Steam_T_out, Steam_P_out, Steam_h_out, Steam_m_out] = ...
+    steam_turbine_measured(Steam_h_in, Steam_P_in, Steam_m_in, P_exhaust_target, eta_is)
+
+% Declare extrinsic functions
+coder.extrinsic('py.CoolProp.CoolProp.PropsSI');
+
+% 1. Initialize variables to define them as double scalars for the Coder
+fluid = 'Water';
+s_in = 0;
+h_out_s = 0;
+T_out_val = 0;
+Steam_T_out = 0;
+
+% 2. Inlet Entropy calculation
+s_in_mx = py.CoolProp.CoolProp.PropsSI('S', 'H', double(Steam_h_in), 'P', double(Steam_P_in), fluid);
+s_in = double(s_in_mx);
+
+% 3. Actual Expansion logic
+% Get isentropic enthalpy
+h_out_s_mx = py.CoolProp.CoolProp.PropsSI('H', 'S', s_in, 'P', double(P_exhaust_target), fluid);
+h_out_s = double(h_out_s_mx);
+
+% Now h_out_s is a native double and can be used in this expression:
+h_out_act = double(Steam_h_in) - (double(eta_is) * (double(Steam_h_in) - h_out_s));
+
+% 4. Outputs
+W_turb = double(Steam_m_in) * (double(Steam_h_in) - h_out_act); % Power in Watts
+Steam_h_out = h_out_act;
+Steam_P_out = double(P_exhaust_target);
+
+% Final temperature calculation
+T_out_mx = py.CoolProp.CoolProp.PropsSI('T', 'H', h_out_act, 'P', double(P_exhaust_target), fluid);
+Steam_T_out = double(T_out_mx);
+
+Steam_m_out = double(Steam_m_in);
+
+end</code></pre>
+
+<div class="codecap">A.5 &mdash; hybrid_desal_tvc.m (MED with thermal vapour compression)</div>
+<pre class="code"><code>function [m_fresh_total, P_parasitic_total, Water_T_out, Water_h_out, Water_m_out] = ...
+    hybrid_desal_tvc(h_motive_in, m_motive_in, P_motive, T_entrained, P_entrained, P_compressed, W_elec_in, SEC_ro)
+
+% h_motive_in: Enthalpy from LP Turbine outlet (Motive Steam)
+% m_motive_in: Steam flow from Turbine (kg/s)
+% T_entrained/P_entrained: Conditions of vapor from last MED effect
+
+coder.extrinsic('py.CoolProp.CoolProp.PropsSI');
+
+Water_h_out = 0; % 1. TVC Entrainment Ratio (Ra)
+% Ra = flow rate of motive steam / flow rate of entrained vapor
+% Using the Power (1994) simplified correlation provided in text
+PCF = 3e-7 * P_motive + 0.95; % Pressure Correction Factor
+TCF = 1.0; % Temp Correction Factor (Simplified for Phase 1)
+Cr = P_compressed / P_entrained; % Compression Ratio
+
+% Ra calculation (Semi-empirical model)
+Ra = 0.29 * (Cr^1.19) / (PCF * TCF);
+m_entrained = m_motive_in / Ra;
+
+% 2. MED Performance (Thermal)
+% Total heating steam = motive + entrained
+m_heating_steam = m_motive_in + m_entrained;
+% GOR is typically higher for TVC (e.g., 10-14)
+GOR_tvc = 11.1;
+m_fresh_med = m_heating_steam * GOR_tvc;
+
+% 3. RO Process (Electrical)
+m_fresh_ro = W_elec_in / (SEC_ro * 3600); % J/kg conversion
+
+% 4. Output State for Closed-Loop (To Pump/HRSG)
+% The motive steam and entrained vapor condense into liquid water
+Water_m_out = m_motive_in; % Mass balance of the loop fluid
+Water_T_out = 343.15; % 70 C return temp (saturated liquid)
+Water_h_out = double(py.CoolProp.CoolProp.PropsSI('H', 'T', Water_T_out, 'P', P_compressed, 'Water'));
+
+% 5. System Totals
+m_fresh_total = m_fresh_med + m_fresh_ro;
+P_parasitic_total = W_elec_in; % Load for RO Pumps
+
+end</code></pre>
+
+<div class="codecap">A.6 &mdash; hrsg_boiler.m (Heat Recovery Steam Generator energy balance)</div>
+<pre class="code"><code>function [He_P_out, He_T_out, Steam_P_out, Steam_T_out, Steam_h_out, Q_transferred] = ...
+    hrsg_boiler(He_T_in, He_P_in, He_m_dot, Water_T_in, Water_P_in, Water_m_dot, ...
+    UA_eff, dP_He_frac, dP_Water_frac)
+
+% Declare extrinsic for Coder compatibility
+coder.extrinsic('py.CoolProp.CoolProp.PropsSI');
+
+% Strings for CoolProp
+fluid_he = 'Helium';
+fluid_water = 'Water';
+h_he_in = 0;
+h_he_target = 0;
+h_water_in = 0;
+He_T_out = 0;
+Steam_T_out = 0;
+
+%% ---------------- 1. INPUT SAFETY ----------------
+% Helium
+T_he_safe = double(He_T_in);
+if T_he_safe &lt; 100
+    T_he_safe = 1000;
+end
+
+P_he_safe = double(He_P_in);
+if P_he_safe &lt; 1e3
+    P_he_safe = 7e6;
+end
+
+m_dot_he_safe = double(He_m_dot);
+if m_dot_he_safe &lt; 1e-3
+    m_dot_he_safe = 85.0;
+end
+
+% Water
+T_water_safe = double(Water_T_in);
+if T_water_safe &lt; 200
+    T_water_safe = 343.15;
+end
+
+P_water_safe = double(Water_P_in);
+if P_water_safe &lt; 1e3
+    P_water_safe = 7e6;
+end
+
+m_dot_water_safe = double(Water_m_dot);
+if m_dot_water_safe &lt; 1e-3
+    m_dot_water_safe = 100.0;
+end
+
+%% ---------------- 2. CLAMP PRESSURE DROPS ----------------
+dP_He = min(max(double(dP_He_frac), 0.0), 0.9);
+dP_W  = min(max(double(dP_Water_frac), 0.0), 0.9);
+
+%% ---------------- 3. THERMODYNAMICS ----------------
+% Helium inlet enthalpy
+h_he_in = double(py.CoolProp.CoolProp.PropsSI('H','T', T_he_safe,'P', P_he_safe, fluid_he));
+
+% Helium target enthalpy (672 K)
+h_he_target = double(py.CoolProp.CoolProp.PropsSI('H','T',672.0,'P', P_he_safe, fluid_he));
+
+% Heat transfer
+Q_transferred = m_dot_he_safe * (h_he_in - h_he_target);
+
+% Water inlet enthalpy
+h_water_in = double(py.CoolProp.CoolProp.PropsSI('H','T', T_water_safe,'P', P_water_safe, fluid_water));
+
+%% ---------------- 4. OUTLET STATES ----------------
+% Helium outlet
+He_P_out = P_he_safe * (1.0 - dP_He);
+if He_P_out &lt; 1e3
+    He_P_out = 1e5;
+end
+
+h_he_out = h_he_in - Q_transferred / m_dot_he_safe;
+
+% Steam outlet
+Steam_P_out = P_water_safe * (1.0 - dP_W);
+if Steam_P_out &lt; 1e3
+    Steam_P_out = 1e5;
+end
+
+h_steam_out = h_water_in + Q_transferred / m_dot_water_safe;
+
+% Enthalpy sanity
+if h_steam_out &lt; 1e5
+    h_steam_out = 3e5;
+end
+
+Steam_h_out = h_steam_out;
+
+%% ---------------- 5. FINAL TEMPERATURE LOOKUPS ----------------
+He_T_out = double(py.CoolProp.CoolProp.PropsSI('T','H', h_he_out,'P', He_P_out, fluid_he));
+Steam_T_out = double(py.CoolProp.CoolProp.PropsSI('T','H', h_steam_out,'P', Steam_P_out, fluid_water));
+
+end</code></pre>
+
+<div class="codecap">A.7 &mdash; steam_sponge_thermosyphon_PDC_Q_SWEEP_ALLINONE.m (porous-cube heat rejection sizing model)</div>
+<pre class="code"><code>% steam_sponge_thermosyphon_PDC_Q_SWEEP_ALLINONE.m
+% =========================================================================
+% ONE-FILE: PDC-style step test (steady-state sweep) on Q_total.
+% Sweeps down from 147.7 MW in -10 MW steps, then up in +10 MW steps,
+% stopping when results become "unrealistic" by simple criteria.
+% Outputs a summary table for each Q_total.
+% =========================================================================
+clear; clc; close all;
+
+%% ---------------- USER SETTINGS ----------------
+Q_base_MW = 147.7;   % baseline [MW]
+dQ_MW = 10;           % step size [MW]
+max_steps_each_side = 25; % hard cap so it can't run forever
+
+% "Realism" stop criteria (edit if you want)
+max_modules = 5000;         % stop if module count exceeds this
+max_parasitic_frac = 0.20;  % stop if fan power &gt; 20% of Q_total
+min_Q_MW = 10;               % stop if Q gets too small/meaningless
+
+%% ---------------- BUILD Q VECTOR ----------------
+Q_list_MW = Q_base_MW; % start
+
+% sweep down
+Qk = Q_base_MW - dQ_MW;
+for i=1:max_steps_each_side
+    if Qk &lt; min_Q_MW
+        break;
+    end
+    Q_list_MW(end+1) = Qk; %#ok&lt;SAGROW&gt;
+    Qk = Qk - dQ_MW;
+end
+
+% sweep up
+Qk = Q_base_MW + dQ_MW;
+for i=1:max_steps_each_side
+    Q_list_MW(end+1) = Qk; %#ok&lt;SAGROW&gt;
+    Qk = Qk + dQ_MW;
+end
+
+% Put baseline first, then decreasing, then increasing (as described)
+Q_down = sort(Q_list_MW(Q_list_MW&lt;=Q_base_MW),'descend');
+Q_up = sort(Q_list_MW(Q_list_MW&gt;=Q_base_MW),'ascend');
+Q_vec_MW = [Q_down, Q_up(2:end)];
+
+%% ---------------- RUN SWEEP ----------------
+n = numel(Q_vec_MW);
+
+% Preallocate containers (use NaN, then fill)
+Q_MW = nan(n,1);
+N_modules = nan(n,1);
+Pfan_MW = nan(n,1);
+Vdot_m3s = nan(n,1);
+UA_margin = nan(n,1);
+Tair_out_C = nan(n,1);
+N_TPCT = nan(n,1);
+
+stop_idx = n; % will shorten if stop criteria hit
+
+for k=1:n
+    Q_MW(k) = Q_vec_MW(k);
+    out = steam_sponge_model_run(Q_MW(k)*1e6);
+
+    % Pull outputs (guarded)
+    if isfield(out,'N_modules'); N_modules(k) = out.N_modules; end
+    if isfield(out,'P_fan_total_W'); Pfan_MW(k) = out.P_fan_total_W/1e6; end
+    if isfield(out,'Vdot_air_total_m3s'); Vdot_m3s(k) = out.Vdot_air_total_m3s; end
+    if isfield(out,'UA_margin'); UA_margin(k) = out.UA_margin; end
+    if isfield(out,'T_air_out_C'); Tair_out_C(k) = out.T_air_out_C; end
+    if isfield(out,'N_TPCT_total'); N_TPCT(k) = out.N_TPCT_total; end
+
+    % ---- stop criteria ----
+    parasitic_frac = Pfan_MW(k)*1e6 / (Q_MW(k)*1e6); % W/W
+    if (~isnan(N_modules(k)) &amp;&amp; N_modules(k) &gt; max_modules) || ...
+       (~isnan(parasitic_frac) &amp;&amp; parasitic_frac &gt; max_parasitic_frac)
+        stop_idx = k;
+        break;
+    end
+end
+
+% (summary-table, plotting, and reporting code omitted here for brevity -
+%  see steam_sponge_model_run below for the physics)
+
+%% =========================================================================
+% MODEL WRAPPER (vendorized sizing model, converted to a function)
+% =========================================================================
+function out = steam_sponge_model_run(Q_total_in)
+% 0) SYSTEM-LEVEL INPUTS (TEAM VALUES)
+Q_total = Q_total_in; % [W] swept input
+
+% Ambient air side (TEAM SLIDES)
+T_air_in_C = 20;         % [C] ambient air inlet temperature
+P_amb = 101325;            % [Pa] ambient pressure
+dT_air = 15;                % [K] allowed air temperature rise
+cp_air = 1005;               % [J/kg-K] air specific heat
+rho_air = 1.177;              % [kg/m^3] air density at design point
+dP_air = 225;                  % [Pa] allowed air pressure drop
+eta_fan = 0.65;                 % [-] fan+motor+drive efficiency
+crosswind_multiplier = 1.10;     % [-] airflow derate/multiplier
+
+% Coil "lumped" performance (TEAM SLIDES)
+U_overall = 40;   % [W/m^2-K] overall U
+F_LMTD = 0.98;      % [-] LMTD correction factor
+
+% Steam condition (TEAM SLIDES)
+Tsat_C = 65;         % [C] steam saturation temperature in receiver
+Psat_bar = 0.25;       % [bar] saturation pressure
+x_in = 0.88;             % [-] steam quality at inlet
+x_out = 0.0;               % [-] quality after full condensation (design target)
+h_fg = 2.346e6;               % [J/kg] latent heat at ~65 C
+
+g = 9.81; % [m/s^2] gravity
+
+% Condenser surface temperature target
+T_cond_surface_C = 62; % [C] (TEAM/DESIGN TARGET)
+
+%% 1) FLUID PROPERTIES (WATER/STEAM + AIR)
+st = satWater_simple(Tsat_C);
+
+h_in = st.hf + x_in*h_fg;
+h_out = st.hf + x_out*h_fg;
+dh = h_in - h_out;
+
+m_dot_mix = Q_total/dh;
+m_dot_vapor = x_in*m_dot_mix;
+
+mu_air = 1.90e-5;
+k_air = 0.027;
+Pr_air = cp_air*mu_air/k_air;
+
+%% 2) THERMOSYPHON (TPCT) GEOMETRY + MATERIAL (VENDOR-ORIENTED)
+tp.OD = 0.0127;                 % [m] 1/2 inch = 12.7 mm
+tp.t_wall = 0.001016;             % [m] 0.040 inch (ASTM B88 Type L typical)
+tp.ID = tp.OD - 2*tp.t_wall;
+tp.Lev = 1.50;                       % [m] evaporator length inside sponge (TEAM CAD ASSUMPTION)
+tp.Lco = 3.00;                         % [m] condenser length in air coil region (TEAM CAD ASSUMPTION)
+tp.k_wall = 390;                         % [W/m-K] copper tube wall conductivity
+
+Aev_od = pi*tp.OD*tp.Lev;
+Aev_id = pi*tp.ID*tp.Lev;
+Aco_id = pi*tp.ID*tp.Lco;
+
+R_wall_ev = log(tp.OD/tp.ID)/(2*pi*tp.k_wall*tp.Lev);
+R_wall_co = log(tp.OD/tp.ID)/(2*pi*tp.k_wall*tp.Lco);
+
+%% 3) POROUS RECEIVER ("SPONGE/FOAM") (RECEMAT-BASED PLACEHOLDERS)
+foam.eps = 0.95;      % [-] porosity (Recemat datasheet)
+foam.a_s = 1000;         % [m^2/m^3] specific surface area density
+
+foam.k_eff = 5.8;          % [W/m-K] NEED VENDOR DATA (temporary team estimate)
+foam.K_perm = 2e-8;           % [m^2] NEED VENDOR DATA (temporary assumption)
+foam.t_lig = 0.0008;             % [m] NEED VENDOR DATA (temporary assumption)
+
+foam.t_receiver = 0.020;           % [m] (TEAM CAD ASSUMPTION)
+foam.F_cond_enh = 1.0;                % [-] NEED TEST/LITERATURE (default 1.0)
+
+r0 = tp.OD/2;
+r1 = r0 + foam.t_receiver;
+
+A_cs_foam = pi*(r1^2 - r0^2);
+V_foam = A_cs_foam*tp.Lev;
+A_foam_geom = foam.a_s*V_foam;
+
+%% 4) STEAM-SIDE CONDENSATION HTC (NUSSELT FILM CONDENSATION)
+w = satWater_simple(Tsat_C);
+mu_l = muWater_simple(Tsat_C);
+k_l = kWater_simple(Tsat_C);
+
+dT_steam_receiver = 8; % [K] TEAM DESIGN ASSUMPTION
+
+h_nusselt = hFilmCond_NusseltVertical(w.rho_l, w.rho_v, mu_l, k_l, h_fg, g, tp.Lev, dT_steam_receiver);
+h_steam = foam.F_cond_enh*h_nusselt;
+
+L_fin = foam.t_receiver;
+m = sqrt(2*h_steam/(foam.k_eff*foam.t_lig));
+eta_foam = tanh(m*L_fin)/(m*L_fin);
+eta_foam = max(min(eta_foam,1),0.05);
+
+A_eff_steam = Aev_od + eta_foam*A_foam_geom;
+R_steam = 1/(h_steam*A_eff_steam);
+
+%% 5) INTERNAL EVAPORATOR BOILING HTC (INSIDE TPCT EVAPORATOR)
+h_boil = 12000; % [W/m^2-K] NEED TPCT VENDOR DATA (placeholder)
+R_boil = 1/(h_boil*Aev_id);
+
+R_evap_total = R_steam + R_wall_ev + R_boil;
+dT_allow_evap = 12; % [K] TEAM DESIGN CRITERION
+
+%% 6) AIR-COOLED CONDENSER (PREFERRED: VENDOR MODULE UA)
+coil.vendor = 'Kelvion RF-NC101E4H (example drycooler module)';
+coil.Ao_total_per_module = 197.1;   % [m^2]
+coil.airflow_m3ph = 19400;             % [m^3/h]
+coil.Vdot_air_mod = coil.airflow_m3ph/3600;
+
+coil.mod_W = 1.610;
+coil.mod_H = 1.350;
+coil.A_frontal = coil.mod_W*coil.mod_H;
+
+V_face_vendor = coil.Vdot_air_mod/coil.A_frontal;
+
+mdot_air_mod = rho_air*coil.Vdot_air_mod;
+Qcap_mod = mdot_air_mod*cp_air*dT_air;
+
+Qcap_mod_effective = Qcap_mod/crosswind_multiplier;
+
+N_modules = max(1, ceil(Q_total/Qcap_mod_effective));
+
+Vdot_air_total = coil.Vdot_air_mod*N_modules;
+P_fan_total = dP_air*Vdot_air_total/eta_fan;
+
+T_air_out_C = T_air_in_C + dT_air;
+DT1 = T_cond_surface_C - T_air_in_C;
+DT2 = T_cond_surface_C - T_air_out_C;
+DTlm = (DT1 - DT2)/log(DT1/DT2);
+
+UA_req = Q_total/(F_LMTD*DTlm);
+UA_avail = U_overall*coil.Ao_total_per_module*N_modules;
+UA_margin = UA_avail/UA_req;
+
+%% 7) TPCT HEAT-TRANSPORT LIMITS (FLOODING + BOILING + SONIC CHECK)
+T_tp_C = (Tsat_C + T_cond_surface_C)/2;
+wt = satWater_simple(T_tp_C);
+
+sigma_w = surfaceTension_IAPWS2014(T_tp_C);
+A_v = pi*(tp.ID^2)/4;
+
+Qmax_flood = QmaxFlood_FaghriStyle(tp.ID, A_v, wt.rho_l, wt.rho_v, h_fg, sigma_w, g);
+Qmax_design = 0.60*Qmax_flood;
+
+qCHF_frac = 0.30;
+qCHF_Zuber = CHF_ZuberPoolBoiling(wt.rho_l, wt.rho_v, h_fg, sigma_w, g);
+Qmax_boil = qCHF_frac*qCHF_Zuber*(pi*tp.ID*tp.Lev);
+
+a_v = 430;
+G_sonic_allow = 0.25*wt.rho_v*a_v;
+Qmax_sonic = G_sonic_allow*A_v*h_fg;
+
+Qmax_tpct = min([Qmax_design, Qmax_boil, Qmax_sonic]);
+
+%% 8) NUMBER OF THERMOSYPHONS REQUIRED (BASED ON LIMITS + TEMPERATURE DROP)
+h_cond_int = 12000; % [W/m^2-K] NEED TPCT VENDOR DATA
+R_cond_int = 1/(h_cond_int*Aco_id);
+
+R_air_total = 1/(UA_avail);
+
+N_pipes = 5000; % [-] initial guess (TEAM GUESS)
+while true
+    Q_pipe = Q_total/N_pipes;
+    dT_evap = Q_pipe*R_evap_total;
+
+    R_air_per_pipe = R_air_total*N_pipes;
+    R_cond_total = R_cond_int + R_wall_co + R_air_per_pipe;
+    dT_cond = Q_pipe*R_cond_total;
+
+    limits_ok = (Q_pipe &lt;= Qmax_tpct);
+    dT_ok = (dT_evap &lt;= dT_allow_evap);
+
+    if limits_ok &amp;&amp; dT_ok
+        break;
+    end
+
+    if ~limits_ok
+        N_pipes = N_pipes + 2000;
+    else
+        N_pipes = N_pipes + 500;
+    end
+end
+
+Q_pipe = Q_total/N_pipes;
+dT_evap = Q_pipe*R_evap_total;
+dT_cond = Q_pipe*R_cond_total;
+dT_total_pipe = dT_evap + dT_cond;
+
+%% 9) CONDENSATE DRAINAGE CHECK IN POROUS RECEIVER (DARCY)
+m_dot_cond_total = m_dot_vapor;
+m_dot_cond_per_pipe = m_dot_cond_total/N_pipes;
+Vdot_cond_per_pipe = m_dot_cond_per_pipe/w.rho_l;
+
+v_Darcy = Vdot_cond_per_pipe/A_cs_foam;
+dP_dz = mu_l*v_Darcy/foam.K_perm;
+dP_total = dP_dz*tp.Lev;
+
+dP_head = w.rho_l*g*tp.Lev;
+drain_ok = (dP_total &lt;= 0.5*dP_head);
+
+%% -------- PACK OUTPUTS --------
+out = struct();
+out.Q_total_W = Q_total;
+out.N_modules = N_modules;
+out.P_fan_total_W = P_fan_total;
+out.Vdot_air_total_m3s = Vdot_air_total;
+out.T_air_out_C = T_air_out_C;
+out.UA_req_WK = UA_req;
+out.UA_avail_WK = UA_avail;
+out.UA_margin = UA_margin;
+
+end
+
+% =========================================================================
+% SUBFUNCTIONS
+% =========================================================================
+function st = satWater_simple(T_C)
+% satWater_simple
+%   Quick saturated-water lookup for 50-100C, linear interpolation.
+%   Returns: psat [Pa], rho_l [kg/m3], rho_v [kg/m3], hf [J/kg], hfg [J/kg]
+%   Source of numbers: typical steam tables (embedded dataset).
+%   Upgrade path: replace with IF97 (IAPWS) or CoolProp for production work.
+
+T = [50 55 60 65 70 75 80 85 90 95 100];
+ps_MPa = [0.012352 0.015761 0.019946 0.025042 0.031201 0.038563 0.047373 0.057834 0.070140 0.084552 0.101325];
+rho_l  = [988.05 985.65 983.16 980.52 977.76 974.89 971.91 968.82 965.62 962.33 958.37];
+rho_v  = [0.08302 0.10266 0.13043 0.16146 0.19833 0.24418 0.29216 0.34569 0.41451 0.49220 0.59752];
+hf_kJ  = [209.33 230.23 251.18 272.12 292.98 313.93 334.91 355.90 376.92 397.96 419.04];
+hfg_kJ = [2382.7 2370.7 2357.7 2345.4 2333.8 2321.4 2308.8 2296.0 2283.2 2270.2 2257.0];
+
+T_C = max(min(T_C, max(T)), min(T));
+
+st.psat = interp1(T, ps_MPa, T_C, 'linear')*1e6;
+st.rho_l = interp1(T, rho_l, T_C, 'linear');
+st.rho_v = interp1(T, rho_v, T_C, 'linear');
+st.hf = interp1(T, hf_kJ, T_C, 'linear')*1e3;
+st.hfg = interp1(T, hfg_kJ, T_C, 'linear')*1e3;
+end
+
+function mu = muWater_simple(T_C)
+% muWater_simple
+%   Rough liquid water viscosity correlation (Andrade-type).
+%   Valid-ish for ~0-100C. Replace with IAPWS viscosity for higher fidelity.
+T = T_C + 273.15;
+mu = 2.414e-5*10^(247.8/(T-140));
+end
+
+function k = kWater_simple(T_C)
+% kWater_simple
+%   Rough liquid water thermal conductivity fit, 0-100C.
+k = 0.561 + 0.0019*T_C - 1.0e-5*T_C.^2;
+end
+
+function h = hFilmCond_NusseltVertical(rhoL, rhoV, muL, kL, hfg, g, L, dT)
+% hFilmCond_NusseltVertical
+%   Nusselt laminar film condensation on a vertical surface (average h).
+%   h = 0.943 * [ rhoL*(rhoL-rhoV)*g*hfg*kL^3 / (muL*L*dT) ]^(1/4)
+h = 0.943 * (rhoL*(rhoL-rhoV)*g*hfg*kL^3/(muL*L*max(dT,1e-6)))^(1/4);
+end
+
+function sigma = surfaceTension_IAPWS2014(T_C)
+% surfaceTension_IAPWS2014
+%   Official IAPWS (2014) surface tension correlation:
+%   sigma = B * tau^mu * (1 + b*tau), tau = 1 - T/Tc
+%   Parameters from IAPWS PDF: Tc=647.096 K, B=235.8 mN/m, mu=1.256, b=-0.625
+%   Source: https://iapws.org/public/documents/CH-L9/Surf-H2O-2014.pdf
+T = T_C + 273.15;
+Tc = 647.096;
+tau = 1 - T/Tc;
+B = 235.8e-3; mu = 1.256; b = -0.625;
+sigma = B*(tau^mu)*(1 + b*tau);
+end
+
+function Qmax = QmaxFlood_FaghriStyle(D, Av, rhoL, rhoV, hfg, sigma, g)
+% QmaxFlood_FaghriStyle
+%   Engineering flooding/entrainment limit form for wickless thermosyphons.
+%   Used as a practical bound; vendor data should replace if available.
+Bo = sqrt((rhoL - rhoV)*g*D^2/sigma);
+K = (rhoL/rhoV)^0.14 * (tanh(sqrt(Bo)))^2;
+term1 = (g*sigma*(rhoL - rhoV))^(0.25);
+term2 = (rhoV^(-0.5) + rhoL^(-0.5))^(-2);
+Qmax = K*hfg*Av*term1*term2;
+end
+
+function qCHF = CHF_ZuberPoolBoiling(rhoL, rhoV, hfg, sigma, g)
+% CHF_ZuberPoolBoiling
+%   Zuber CHF correlation for pool boiling (large horizontal surface):
+%   q''_CHF = 0.131 * hfg * rhoV^(1/2) * [ sigma*g*(rhoL-rhoV) ]^(1/4)
+qCHF = 0.131 * hfg * sqrt(rhoV) * (sigma*g*(rhoL-rhoV))^(1/4);
+end
+% =========================================================================
+</code></pre>
+</div>
+
+
+<div class="page appendix-section">
+<h2 id="appB">Appendix B &mdash; Python Physics Engine</h2>
+<p><code>src/htgr_physics.py</code> &mdash; the direct one-to-one translation of Appendix A.1 and A.2
+into a coupled 10-state SciPy ODE system (Part III).</p>
+<pre class="code"><code>"""HTGR reactor physics engine: point kinetics + 3-node thermal core.
+
+Direct translation of the MATLAB/Simulink ``Calculate_Kinetics`` and
+``core_thermals`` blocks from the Imperial HTGR-5 scaled-HTTR model into a
+single coupled ODE system, integrated with ``scipy.integrate.solve_ivp``.
+
+Reference: "Scaled High Temperature Test Reactor Cogeneration for Zero
+Emission Hybrid-Desalination with Independent Water Heat Rejection",
+Imperial College London, March 2026 - Part I, Sections 1.3, 2.1-2.3;
+Appendix B, Listings 1-2.
+
+Notes on fidelity to the source model
+--------------------------------------
+* All constants below (beta_i, lambda_i, prompt neutron lifetime, thermal
+  capacities, heat-transfer coefficients, helium cp) are copied verbatim
+  from the MATLAB appendix listings, including the literal factor of 2 on
+  the coolant convective-removal term in ``core_thermals.m``.
+* The appendix's ``Calculate_Kinetics`` function takes reactivity as a
+  single external input ``rho_in`` — despite the Simulink block diagram
+  (Fig. 1) showing Tf/Tm feeding back into the kinetics block, the
+  provided code has no internal temperature-feedback term. This port
+  matches the code as written: reactivity is a pure function of time,
+  supplied via the ``reactivity`` callable. A temperature-feedback
+  (Doppler/moderator coefficient) term can be added by passing a callable
+  of the form ``rho(t, state)`` — see ``HTGRReactorModel.rhs``.
+* The report's Fig. 3 validation plot benchmarks the thermal-core block
+  against literature HTTR data at what appears to be a different
+  (lower/normalised) operating point than this project's 300 MWth design
+  point — the appendix gives no numeric value for the reactivity step
+  used to produce that figure. Rather than guess pixel values off a
+  scanned plot, initial conditions here are computed *analytically* as
+  the true steady state of the 3-node thermal network for whatever
+  power/flow/inlet-temperature you specify (see ``steady_state``), and
+  the reactivity step size is an explicit, clearly-labelled placeholder
+  you should calibrate against your own target transient.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any, Callable, NamedTuple
+
+import numpy as np
+from scipy.integrate import solve_ivp
+
+N_GROUPS = 6
+
+# Standard 6-group U-235 delayed-neutron data, from Calculate_Kinetics.m
+BETA_I = np.array([0.00025, 0.00138, 0.00122, 0.00266, 0.00164, 0.00035])
+LAMBDA_I = np.array([0.0766, 0.2825, 0.6154, 1.634, 5.176, 16.72])
+
+
+@dataclass(frozen=True)
+class KineticsParams:
+    """Point-kinetics constants (``Calculate_Kinetics.m``)."""
+
+    beta_i: np.ndarray = field(default_factory=lambda: BETA_I.copy())
+    lambda_i: np.ndarray = field(default_factory=lambda: LAMBDA_I.copy())
+    prompt_neutron_lifetime: float = 1.0e-3  # Lambda, s
+    q_nominal: float = 300e6  # W, nominal reactor thermal power
+
+    @property
+    def beta_total(self) -&gt; float:
+        return float(np.sum(self.beta_i))
+
+
+@dataclass(frozen=True)
+class ThermalCoreParams:
+    """3-node thermal-core constants (``core_thermals.m``)."""
+
+    c_fuel: float = 5.0e6  # J/K
+    c_moderator: float = 1.0e8  # J/K
+    c_coolant: float = 1.0e6  # J/K
+    h_fuel_moderator: float = 2.0e5  # W/K
+    h_fuel_coolant: float = 4.0e5  # W/K
+    h_moderator_coolant: float = 1.5e5  # W/K
+    coolant_cp: float = 5193.0  # J/(kg K), helium
+
+
+@dataclass(frozen=True)
+class OperatingConditions:
+    """Plant-level operating point (Part I, Section 1.3)."""
+
+    helium_mass_flow: float = 105.0  # kg/s
+    coolant_inlet_temp: float = 623.15  # K (350 degC compressor-outlet estimate)
+
+
+ReactivityFunc = Callable[[float, float, float], float]  # (t, fuel_temp, moderator_temp) -&gt; rho
+
+
+def external_step_reactivity(t_step: float, rho_insertion: float) -&gt; ReactivityFunc:
+    """External reactivity only (rho_ext), exactly as ``Calculate_Kinetics.m``
+    consumes its ``rho_in`` argument - no temperature feedback.
+
+    WARNING: with no feedback, a sustained positive step causes power (and
+    therefore temperature) to grow without bound - this is correct,
+    expected point-kinetics behaviour for an open-loop reactivity
+    insertion held constant forever, not a bug. It also means this
+    reactivity function is only useful for short transients or negative
+    steps. For a self-limiting transient, use
+    ``doppler_feedback_reactivity`` instead.
+    """
+
+    def _rho(t: float, fuel_temp: float, moderator_temp: float) -&gt; float:
+        del fuel_temp, moderator_temp  # unused: no feedback, matches the literal MATLAB
+        return rho_insertion if t &gt;= t_step else 0.0
+
+    return _rho
+
+
+def doppler_feedback_reactivity(
+    t_step: float,
+    rho_insertion: float,
+    fuel_temp_ref: float,
+    moderator_temp_ref: float,
+    alpha_fuel: float = -3.0e-5,
+    alpha_moderator: float = -8.0e-6,
+) -&gt; ReactivityFunc:
+    """External step reactivity plus linear fuel/moderator temperature
+    feedback::
+
+        rho(t) = rho_ext(t) + alpha_fuel * (Tf - Tf_ref)
+                             + alpha_moderator * (Tm - Tm_ref)
+
+    The appendix's ``Calculate_Kinetics.m`` listing takes reactivity as a
+    single external input with no feedback term, even though the Simulink
+    block diagram (Fig. 1) shows Tf/Tm feeding into the kinetics block -
+    the feedback arithmetic itself isn't in the given listing. ``alpha_fuel``
+    and ``alpha_moderator`` (Doppler and moderator temperature coefficients,
+    1/K, both conventionally negative/self-stabilising) are NOT given
+    numerically anywhere in the report; the defaults are illustrative
+    magnitudes typical of a graphite-moderated HTGR, not extracted report
+    data - tune them if you have real coefficients.
+    """
+
+    def _rho(t: float, fuel_temp: float, moderator_temp: float) -&gt; float:
+        rho_ext = rho_insertion if t &gt;= t_step else 0.0
+        return (
+            rho_ext
+            + alpha_fuel * (fuel_temp - fuel_temp_ref)
+            + alpha_moderator * (moderator_temp - moderator_temp_ref)
+        )
+
+    return _rho
+
+
+class ReactorState(NamedTuple):
+    """Named view into a single time-slice of the ODE state vector."""
+
+    power: float
+    precursors: np.ndarray
+    fuel_temp: float
+    moderator_temp: float
+    coolant_temp: float
+
+
+class HTGRReactorModel:
+    """Coupled point-kinetics / 3-node thermal-core reactor model.
+
+    State vector ``y = [P, C1..C6, Tf, Tm, Tc]`` (10 states):
+
+    * ``P``          normalised reactor power (P = 1 at nominal power)
+    * ``C1..C6``     normalised delayed-neutron precursor concentrations
+    * ``Tf, Tm, Tc`` fuel, moderator, coolant temperatures [K]
+    """
+
+    N_STATES = 1 + N_GROUPS + 3  # power + 6 precursors + 3 temperatures
+
+    def __init__(
+        self,
+        kinetics: KineticsParams | None = None,
+        thermal: ThermalCoreParams | None = None,
+        operating: OperatingConditions | None = None,
+        reactivity: ReactivityFunc | None = None,
+    ) -&gt; None:
+        self.kinetics = kinetics or KineticsParams()
+        self.thermal = thermal or ThermalCoreParams()
+        self.operating = operating or OperatingConditions()
+
+        if reactivity is not None:
+            self.reactivity = reactivity
+        else:
+            # Default: a stable, self-limiting demo transient built around
+            # this model's own steady state. See `doppler_feedback_reactivity`
+            # docstring - the feedback coefficients are illustrative, not
+            # report data. Swap in `external_step_reactivity` for the literal,
+            # feedback-free translation of Calculate_Kinetics.m.
+            ref = self.steady_state()
+            self.reactivity = doppler_feedback_reactivity(
+                t_step=100.0,
+                rho_insertion=0.0022,
+                fuel_temp_ref=ref[7],
+                moderator_temp_ref=ref[8],
+            )
+
+    # ------------------------------------------------------------------
+    # Equilibrium / steady-state helpers
+    # ------------------------------------------------------------------
+    def equilibrium_precursors(self, power: float = 1.0) -&gt; np.ndarray:
+        """Precursor concentrations at equilibrium for a steady ``power``.
+
+        From dC_i/dt = 0: (beta_i / Lambda) * P = lambda_i * C_i
+        =&gt; C_i = beta_i * P / (lambda_i * Lambda).
+        """
+        k = self.kinetics
+        return (k.beta_i / (k.lambda_i * k.prompt_neutron_lifetime)) * power
+
+    def steady_state(
+        self,
+        power: float = 1.0,
+        coolant_inlet_temp: float | None = None,
+        helium_mass_flow: float | None = None,
+    ) -&gt; np.ndarray:
+        """Solve for the self-consistent equilibrium state at a given power.
+
+        Sets dP/dt = 0 (precursors at their equilibrium values) and
+        dTf/dt = dTm/dt = dTc/dt = 0 simultaneously, i.e. solves the 3x3
+        linear heat-balance system implied by ``core_thermals.m`` for
+        [Tf, Tm, Tc]. Use this to generate physically-consistent initial
+        conditions for ``simulate`` at any operating point, rather than
+        hard-coding approximate values.
+        """
+        p = self.thermal
+        t_in = self.operating.coolant_inlet_temp if coolant_inlet_temp is None else coolant_inlet_temp
+        mdot = self.operating.helium_mass_flow if helium_mass_flow is None else helium_mass_flow
+        q_fission = power * self.kinetics.q_nominal
+        removal = 2.0 * mdot * p.coolant_cp  # matches the literal "2*mdot*cp" in core_thermals.m
+
+        # Rows: fuel, moderator, coolant steady energy balances.
+        # Columns: [Tf, Tm, Tc].
+        a = np.array(
+            [
+                [p.h_fuel_moderator + p.h_fuel_coolant, -p.h_fuel_moderator, -p.h_fuel_coolant],
+                [p.h_fuel_moderator, -(p.h_fuel_moderator + p.h_moderator_coolant), p.h_moderator_coolant],
+                [p.h_fuel_coolant, p.h_moderator_coolant, -(p.h_fuel_coolant + p.h_moderator_coolant + removal)],
+            ]
+        )
+        b = np.array([q_fission, 0.0, -removal * t_in])
+        t_fuel, t_moderator, t_coolant = np.linalg.solve(a, b)
+
+        y0 = np.empty(self.N_STATES)
+        y0[0] = power
+        y0[1:7] = self.equilibrium_precursors(power)
+        y0[7], y0[8], y0[9] = t_fuel, t_moderator, t_coolant
+        return y0
+
+    # ------------------------------------------------------------------
+    # ODE right-hand sides
+    # ------------------------------------------------------------------
+    def _point_kinetics(
+        self,
+        t: float,
+        power: float,
+        precursors: np.ndarray,
+        fuel_temp: float,
+        moderator_temp: float,
+    ) -&gt; tuple[float, np.ndarray, float]:
+        """``Calculate_Kinetics.m``, translated one-to-one (the reactivity
+        callable additionally receives Tf/Tm so feedback models can use
+        them; the literal appendix code itself has no feedback term)."""
+        k = self.kinetics
+        rho = self.reactivity(t, fuel_temp, moderator_temp)
+
+        sum_lambda_c = float(np.dot(k.lambda_i, precursors))
+        dp_dt = ((rho - k.beta_total) / k.prompt_neutron_lifetime) * power + sum_lambda_c
+        dc_dt = (k.beta_i / k.prompt_neutron_lifetime) * power - k.lambda_i * precursors
+        q_fission = power * k.q_nominal
+        return dp_dt, dc_dt, q_fission
+
+    def _thermal_core(
+        self,
+        q_fission: float,
+        fuel_temp: float,
+        moderator_temp: float,
+        coolant_temp: float,
+    ) -&gt; tuple[float, float, float]:
+        """``core_thermals.m``, translated one-to-one (including the
+        literal factor of 2 on the coolant convective-removal term)."""
+        p = self.thermal
+        op = self.operating
+
+        dtf_dt = (
+            q_fission
+            - p.h_fuel_moderator * (fuel_temp - moderator_temp)
+            - p.h_fuel_coolant * (fuel_temp - coolant_temp)
+        ) / p.c_fuel
+
+        dtm_dt = (
+            p.h_fuel_moderator * (fuel_temp - moderator_temp)
+            - p.h_moderator_coolant * (moderator_temp - coolant_temp)
+        ) / p.c_moderator
+
+        dtc_dt = (
+            p.h_fuel_coolant * (fuel_temp - coolant_temp)
+            + p.h_moderator_coolant * (moderator_temp - coolant_temp)
+            - 2.0 * op.helium_mass_flow * p.coolant_cp * (coolant_temp - op.coolant_inlet_temp)
+        ) / p.c_coolant
+
+        return dtf_dt, dtm_dt, dtc_dt
+
+    def rhs(self, t: float, y: np.ndarray) -&gt; np.ndarray:
+        """Full coupled derivative vector, for ``solve_ivp``."""
+        power = y[0]
+        precursors = y[1:7]
+        fuel_temp, moderator_temp, coolant_temp = y[7], y[8], y[9]
+
+        dp_dt, dc_dt, q_fission = self._point_kinetics(t, power, precursors, fuel_temp, moderator_temp)
+        dtf_dt, dtm_dt, dtc_dt = self._thermal_core(q_fission, fuel_temp, moderator_temp, coolant_temp)
+
+        dy = np.empty_like(y)
+        dy[0] = dp_dt
+        dy[1:7] = dc_dt
+        dy[7], dy[8], dy[9] = dtf_dt, dtm_dt, dtc_dt
+        return dy
+
+    # ------------------------------------------------------------------
+    # Integration
+    # ------------------------------------------------------------------
+    def simulate(
+        self,
+        t_span: tuple[float, float] = (0.0, 400.0),
+        y0: np.ndarray | None = None,
+        t_eval: np.ndarray | None = None,
+        method: str = "Radau",
+        rtol: float = 1e-8,
+        atol: float = 1e-10,
+    ) -&gt; Any:
+        """Integrate the coupled system over ``t_span``.
+
+        Defaults to an implicit stiff solver ("Radau"): the ~1 ms prompt-
+        neutron timescale (Lambda) and the ~10^2-10^3 s moderator thermal
+        timescale (C_m / h_mc) span more than five orders of magnitude,
+        which explicit solvers handle poorly.
+        """
+        if y0 is None:
+            y0 = self.steady_state()
+        if t_eval is None:
+            t_eval = np.linspace(t_span[0], t_span[1], 2001)
+
+        return solve_ivp(
+            fun=self.rhs,
+            t_span=t_span,
+            y0=y0,
+            method=method,
+            t_eval=t_eval,
+            rtol=rtol,
+            atol=atol,
+        )
+
+    @staticmethod
+    def unpack(sol: Any) -&gt; dict[str, np.ndarray]:
+        """Convenience accessor: a ``solve_ivp`` result -&gt; named arrays."""
+        y = sol.y
+        return {
+            "t": sol.t,
+            "power": y[0],
+            "precursors": y[1:7],
+            "fuel_temp": y[7],
+            "moderator_temp": y[8],
+            "coolant_temp": y[9],
+        }
+
+    def state_at(self, sol: Any, index: int) -&gt; ReactorState:
+        """Named view of the solution at a given time index."""
+        y = sol.y[:, index]
+        return ReactorState(
+            power=y[0],
+            precursors=y[1:7],
+            fuel_temp=y[7],
+            moderator_temp=y[8],
+            coolant_temp=y[9],
+        )
+
+
+if __name__ == "__main__":
+    model = HTGRReactorModel()
+    solution = model.simulate()
+
+    if not solution.success:
+        raise RuntimeError(f"Integration failed: {solution.message}")
+
+    results = model.unpack(solution)
+    peak_fuel_idx = int(np.argmax(results["fuel_temp"]))
+    peak_mod_idx = int(np.argmax(results["moderator_temp"]))
+
+    print(f"Solver: {solution.status} ({solution.message}); {len(solution.t)} output points")
+    print(f"Steady-state Tf/Tm/Tc at t=0: "
+          f"{results['fuel_temp'][0]:.2f} K / "
+          f"{results['moderator_temp'][0]:.2f} K / "
+          f"{results['coolant_temp'][0]:.2f} K")
+    print(f"Peak fuel temp:      {results['fuel_temp'][peak_fuel_idx]:.2f} K "
+          f"at t = {results['t'][peak_fuel_idx]:.1f} s")
+    print(f"Peak moderator temp: {results['moderator_temp'][peak_mod_idx]:.2f} K "
+          f"at t = {results['t'][peak_mod_idx]:.1f} s")
+    print(f"Final coolant temp:  {results['coolant_temp'][-1]:.2f} K")
+</code></pre>
+</div>
+
+
+<div class="page appendix-section">
+<h2 id="appC">Appendix C &mdash; Python Monte Carlo Data Pipeline</h2>
+<p><code>src/data_pipeline.py</code> &mdash; the 1,000-run Monte Carlo telemetry generator, including
+the direct Python/CoolProp port of Appendix A.3 (Part IV).</p>
+<pre class="code"><code>"""Monte Carlo telemetry pipeline for the HTGR physics engine.
+
+Samples realistic HTGR operating points, runs the coupled point-kinetics /
+3-node thermal-core model from ``htgr_physics.py`` for each one, chains a
+CoolProp-based helium turbine expansion onto the resulting reactor-outlet
+gas (a direct Python port of Appendix B's ``helium_turbine.m``, mirroring
+the Core-Thermals -&gt; Helium-Turbine block chain in Fig. 5 of the report),
+and writes the combined telemetry to ``data/htgr_telemetry.csv`` as a
+pandas DataFrame.
+
+Scope note: the turbine work calculation is a separate, clearly-labelled
+post-processing step applied to each run's final reactor-outlet
+temperature - it is NOT part of the coupled ODE system built in Step 1
+and does not feed back into the reactor's thermal/kinetic response.
+
+Design note on "randomised initial conditions": rather than sampling raw
+Tf/Tm/Tc values disconnected from the energy balance (which would inject
+an unphysical initial transient into every run and contaminate the peak
+extraction), each scenario randomises the *operating point*
+(helium flow, coolant inlet temperature) and derives a physically
+self-consistent starting state via ``HTGRReactorModel.steady_state()``
+before applying its randomised reactivity step.
+"""
+
+from __future__ import annotations
+
+import sys
+import time
+from dataclasses import asdict, dataclass
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from CoolProp.CoolProp import PropsSI
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from htgr_physics import (  # noqa: E402
+    HTGRReactorModel,
+    KineticsParams,
+    OperatingConditions,
+    ThermalCoreParams,
+    doppler_feedback_reactivity,
+)
+
+N_RUNS = 1000
+SEED = 42
+T_SPAN = (0.0, 400.0)
+T_EVAL = np.linspace(*T_SPAN, 401)  # 1 s resolution; enough to resolve the peaks
+
+OUTPUT_PATH = Path(__file__).resolve().parent.parent / "data" / "htgr_telemetry.csv"
+
+# ---------------------------------------------------------------------------
+# Realistic sampling bounds
+# ---------------------------------------------------------------------------
+# Helium mass flow: report's scaled operating value is 105 kg/s (Part I,
+# Sec. 1.3); swept +/-25% around it.
+HELIUM_FLOW_BOUNDS = (78.0, 132.0)  # kg/s
+
+# Coolant (reactor) inlet temperature: compressor-outlet estimate 350 degC =
+# 623.15 K (Appendix A, Table 9, primary-loop point 2); swept +/-30 K.
+COOLANT_INLET_BOUNDS = (593.15, 653.15)  # K
+
+# Reactivity step magnitude: kept well inside +/-beta_total (0.0075) so every
+# run stays sub-prompt-critical; sign varies to cover both power up- and
+# down-transients.
+RHO_INSERTION_BOUNDS = (-0.0030, 0.0030)
+RHO_STEP_TIME_BOUNDS = (50.0, 150.0)  # s; centred on the report's t = 100 s
+
+# Turbine inlet / back pressure (Appendix A, Table 9: reactor outlet ~70 bar,
+# gas turbine exit ~45 bar) and isentropic efficiency (not given numerically
+# in the report; 0.85-0.92 is a typical industrial range) - sampled
+# independently to explore pressure-drop sensitivity across the turbine.
+TURBINE_P_IN_BOUNDS = (63e5, 77e5)  # Pa (~63-77 bar)
+TURBINE_P_BACK_BOUNDS = (38e5, 50e5)  # Pa (~38-50 bar)
+TURBINE_ETA_BOUNDS = (0.85, 0.92)
+
+
+@dataclass(frozen=True)
+class Scenario:
+    """One sampled operating point + perturbation."""
+
+    run_id: int
+    helium_mass_flow_kgs: float
+    coolant_inlet_temp_K: float
+    rho_insertion: float
+    rho_step_time_s: float
+    turbine_p_in_Pa: float
+    turbine_p_back_Pa: float
+    turbine_eta_is: float
+
+
+def sample_scenarios(n_runs: int, rng: np.random.Generator) -&gt; list[Scenario]:
+    """Uniform-random sampling within the realistic bounds above."""
+    scenarios = []
+    for i in range(n_runs):
+        p_in = rng.uniform(*TURBINE_P_IN_BOUNDS)
+        p_back = rng.uniform(*TURBINE_P_BACK_BOUNDS)
+        p_back = min(p_back, 0.85 * p_in)  # guarantee a valid expansion (P_back &lt; P_in)
+
+        scenarios.append(
+            Scenario(
+                run_id=i,
+                helium_mass_flow_kgs=float(rng.uniform(*HELIUM_FLOW_BOUNDS)),
+                coolant_inlet_temp_K=float(rng.uniform(*COOLANT_INLET_BOUNDS)),
+                rho_insertion=float(rng.uniform(*RHO_INSERTION_BOUNDS)),
+                rho_step_time_s=float(rng.uniform(*RHO_STEP_TIME_BOUNDS)),
+                turbine_p_in_Pa=float(p_in),
+                turbine_p_back_Pa=float(p_back),
+                turbine_eta_is=float(rng.uniform(*TURBINE_ETA_BOUNDS)),
+            )
+        )
+    return scenarios
+
+
+def helium_turbine_work(
+    t_in_k: float, p_in_pa: float, p_back_pa: float, m_dot: float, eta_is: float
+) -&gt; tuple[float, float]:
+    """Direct Python/CoolProp port of Appendix B's ``helium_turbine.m``.
+
+    Isentropic expansion of helium from (T_in, P_in) to P_back with
+    isentropic efficiency ``eta_is``. Returns (work_W, T_out_K).
+    """
+    fluid = "Helium"
+    h_in = PropsSI("H", "T", t_in_k, "P", p_in_pa, fluid)
+    s_in = PropsSI("S", "T", t_in_k, "P", p_in_pa, fluid)
+    h_out_isentropic = PropsSI("H", "S", s_in, "P", p_back_pa, fluid)
+    h_out = h_in - eta_is * (h_in - h_out_isentropic)
+    t_out = PropsSI("T", "H", h_out, "P", p_back_pa, fluid)
+    work_w = m_dot * (h_in - h_out)
+    return work_w, t_out
+
+
+def _failed_run_record(scenario: Scenario, sol_message: str) -&gt; dict:
+    record = asdict(scenario)
+    record["solver_success"] = False
+    record["solver_message"] = sol_message
+    for col in (
+        "initial_fuel_temp_K", "initial_moderator_temp_K", "initial_coolant_temp_K",
+        "peak_fuel_temp_K", "peak_moderator_temp_K", "peak_coolant_temp_K",
+        "final_power_norm", "final_fuel_temp_K", "final_moderator_temp_K",
+        "final_coolant_temp_K", "turbine_pressure_ratio", "turbine_work_MW",
+        "turbine_outlet_temp_K",
+    ):
+        record[col] = np.nan
+    return record
+
+
+def run_scenario(scenario: Scenario) -&gt; dict:
+    """Run one coupled kinetics/thermal-core simulation, then chain the
+    turbine work calculation onto its final reactor-outlet gas state."""
+    operating = OperatingConditions(
+        helium_mass_flow=scenario.helium_mass_flow_kgs,
+        coolant_inlet_temp=scenario.coolant_inlet_temp_K,
+    )
+    kinetics = KineticsParams()
+    thermal = ThermalCoreParams()
+
+    # Physically self-consistent starting point for THIS scenario's
+    # operating conditions (see module docstring).
+    probe = HTGRReactorModel(kinetics, thermal, operating, reactivity=lambda t, tf, tm: 0.0)
+    y0 = probe.steady_state()
+
+    reactivity = doppler_feedback_reactivity(
+        t_step=scenario.rho_step_time_s,
+        rho_insertion=scenario.rho_insertion,
+        fuel_temp_ref=y0[7],
+        moderator_temp_ref=y0[8],
+    )
+    model = HTGRReactorModel(kinetics, thermal, operating, reactivity=reactivity)
+
+    sol = model.simulate(t_span=T_SPAN, y0=y0, t_eval=T_EVAL)
+    if not sol.success:
+        return _failed_run_record(scenario, sol.message)
+
+    results = model.unpack(sol)
+    record = asdict(scenario)
+    record.update(
+        {
+            "solver_success": True,
+            "solver_message": sol.message,
+            "initial_fuel_temp_K": float(results["fuel_temp"][0]),
+            "initial_moderator_temp_K": float(results["moderator_temp"][0]),
+            "initial_coolant_temp_K": float(results["coolant_temp"][0]),
+            "peak_fuel_temp_K": float(np.max(results["fuel_temp"])),
+            "peak_moderator_temp_K": float(np.max(results["moderator_temp"])),
+            "peak_coolant_temp_K": float(np.max(results["coolant_temp"])),
+            "final_power_norm": float(results["power"][-1]),
+            "final_fuel_temp_K": float(results["fuel_temp"][-1]),
+            "final_moderator_temp_K": float(results["moderator_temp"][-1]),
+            "final_coolant_temp_K": float(results["coolant_temp"][-1]),
+            "turbine_pressure_ratio": scenario.turbine_p_in_Pa / scenario.turbine_p_back_Pa,
+        }
+    )
+
+    # Turbine work on the post-transient (t = 400 s) reactor-outlet gas.
+    # Note: the moderator's ~600+ s thermal time constant means it has not
+    # fully re-equilibrated by t = 400 s in most runs - "final" here means
+    # "end of the simulated window", not new steady state.
+    try:
+        work_w, t_out_k = helium_turbine_work(
+            t_in_k=record["final_coolant_temp_K"],
+            p_in_pa=scenario.turbine_p_in_Pa,
+            p_back_pa=scenario.turbine_p_back_Pa,
+            m_dot=scenario.helium_mass_flow_kgs,
+            eta_is=scenario.turbine_eta_is,
+        )
+        record["turbine_work_MW"] = work_w / 1e6
+        record["turbine_outlet_temp_K"] = t_out_k
+    except ValueError:
+        # CoolProp can raise outside its valid range for extreme sampled
+        # combinations - record as missing rather than crashing the sweep.
+        record["turbine_work_MW"] = np.nan
+        record["turbine_outlet_temp_K"] = np.nan
+
+    return record
+
+
+def main() -&gt; None:
+    rng = np.random.default_rng(SEED)
+    scenarios = sample_scenarios(N_RUNS, rng)
+
+    print(f"Running {N_RUNS} HTGR scenarios...")
+    start = time.perf_counter()
+    records = []
+    for i, scenario in enumerate(scenarios, start=1):
+        records.append(run_scenario(scenario))
+        if i % 100 == 0:
+            elapsed = time.perf_counter() - start
+            print(f"  {i}/{N_RUNS} runs complete ({elapsed:.1f}s elapsed)")
+
+    df = pd.DataFrame.from_records(records)
+
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(OUTPUT_PATH, index=False)
+
+    elapsed = time.perf_counter() - start
+    n_ok = int(df["solver_success"].sum())
+    n_turbine_ok = int(df["turbine_work_MW"].notna().sum())
+    print(f"\nDone: {len(df)} runs in {elapsed:.1f}s.")
+    print(f"  ODE solver succeeded:      {n_ok}/{len(df)}")
+    print(f"  Turbine calc succeeded:    {n_turbine_ok}/{len(df)}")
+    print(f"  Wrote: {OUTPUT_PATH}")
+
+    numeric_cols = [
+        "peak_fuel_temp_K", "peak_moderator_temp_K", "peak_coolant_temp_K",
+        "final_coolant_temp_K", "turbine_work_MW", "turbine_outlet_temp_K",
+    ]
+    print("\nSummary of key columns:")
+    print(df[numeric_cols].describe().T[["mean", "std", "min", "max"]])
+
+
+if __name__ == "__main__":
+    main()
+</code></pre>
+</div>
+
+
+<div class="page appendix-section">
+<h2 id="appD">Appendix D &mdash; Python ML Surrogate and Agent</h2>
+<p><code>src/ml_surrogate.py</code> &mdash; the Nystr&ouml;m/Bayesian-ridge scalable surrogate (Part V)
+and the <code>HTGRAgent</code> autonomous decision layer (Part VI).</p>
+<pre class="code"><code>"""Scalable probabilistic surrogate model + agentic safety wrapper for the
+HTGR telemetry generated by data_pipeline.py
+
+Architecture
+1. Preprocessing: pandas ingestion of ``data/htgr_telemetry.csv``,
+   operational-input / target separation, ``StandardScaler`` feature
+   scaling (fit on train only).
+2. Scalable probabilistic modeling: a full ``GaussianProcessRegressor`` is
+   O(N^3) in training-set size, which stops scaling once you're generating
+   tens of thousands of Monte Carlo rows. Instead each target gets a
+   ``Pipeline(StandardScaler -&gt; Nystroem(RBF) -&gt; BayesianRidge)``: the
+   Nystroem step approximates the RBF kernel's feature map with a small
+   number of random components (O(N * n_components^2) instead of O(N^3)),
+   and BayesianRidge then does closed-form Bayesian linear regression on
+   top of that feature map - which is what gives ``predict(..,
+   return_std=True)`` a genuine posterior predictive mean AND standard
+   deviation, not just a point estimate.
+3. ``HTGRAgent``: a plain-Python decision layer around the trained
+   surrogate. It queries the model for a candidate operating point and
+   applies explicit conditional logic (safety-margin breach, high model
+   uncertainty, and - importantly - an out-of-training-envelope check)
+   to decide whether to clear the point or raise a diagnostic.
+
+Honest limitation, stated up front rather than glossed over: unlike a
+true GP, a linear Bayesian model on a *fixed, global* random feature map
+does not reliably inflate its predictive std the further a query point
+gets from the training data - Nystroem features are not guaranteed to
+decorrelate smoothly with distance the way an exact RBF kernel does. So
+``HTGRAgent`` does NOT rely on the model's self-reported std alone for
+out-of-distribution detection; it also runs an explicit, deterministic
+feature-bounds check against the training envelope. Both signals feed the
+same decision, but they catch different failure modes.
+"""
+
+from __future__ import annotations
+
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+import joblib
+import numpy as np
+import pandas as pd
+from sklearn.kernel_approximation import Nystroem
+from sklearn.linear_model import BayesianRidge
+from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "htgr_telemetry.csv"
+MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
+MODEL_PATH = MODELS_DIR / "htgr_surrogate.joblib"
+
+FEATURE_COLUMNS = [
+    "helium_mass_flow_kgs",
+    "coolant_inlet_temp_K",
+    "rho_insertion",
+    "rho_step_time_s",
+    "turbine_p_in_Pa",
+    "turbine_p_back_Pa",
+    "turbine_eta_is",
+]
+TARGET_COLUMNS = ["peak_fuel_temp_K", "turbine_work_MW"]
+
+PARAM_GRID = {
+    "nystroem__gamma": [1e-3, 1e-2, 1e-1, 1.0],
+    "nystroem__n_components": [100, 200, 300],
+}
+
+RANDOM_STATE = 0
+FUEL_TEMP_SAFETY_MARGIN_K = 1650.0
+CONFIDENCE_Z = 2.0  # ~95% one-sided upper bound: mean + Z * std
+
+# Demo scenarios for the agentic-workflow walkthrough (script __main__ and
+# notebooks/HTGR_Analysis.ipynb both import these, so the two never drift).
+SAFE_SCENARIO_DEMO = {
+    "helium_mass_flow_kgs": 110.0,
+    "coolant_inlet_temp_K": 605.0,
+    "rho_insertion": -0.0005,
+    "rho_step_time_s": 100.0,
+    "turbine_p_in_Pa": 7.0e6,
+    "turbine_p_back_Pa": 4.4e6,
+    "turbine_eta_is": 0.89,
+}
+UNSAFE_SCENARIO_DEMO = {
+    "helium_mass_flow_kgs": 70.0,  # below the 78 kg/s training floor -&gt; extrapolation
+    "coolant_inlet_temp_K": 652.0,  # near the training ceiling
+    "rho_insertion": 0.0029,  # near the training ceiling, strongly positive
+    "rho_step_time_s": 60.0,
+    "turbine_p_in_Pa": 7.6e6,
+    "turbine_p_back_Pa": 4.9e6,
+    "turbine_eta_is": 0.91,
+}
+
+
+# ---------------------------------------------------------------------------
+# 1. Data ingestion &amp; preprocessing
+# ---------------------------------------------------------------------------
+def load_telemetry(path: Path = DATA_PATH) -&gt; pd.DataFrame:
+    df = pd.read_csv(path)
+    df = df[df["solver_success"]].reset_index(drop=True)
+    return df
+
+
+def make_pipeline(gamma: float = 0.1, n_components: int = 200) -&gt; Pipeline:
+    """StandardScaler -&gt; Nystroem(RBF) -&gt; BayesianRidge.
+
+    This is the scalable stand-in for a full GP: BayesianRidge gives a
+    closed-form posterior (mean + std) over the Nystroem-approximated
+    kernel feature space in O(N * n_components^2) instead of a GP's
+    O(N^3) Cholesky factorisation of the full kernel matrix.
+    """
+    return Pipeline(
+        [
+            ("scaler", StandardScaler()),
+            ("nystroem", Nystroem(kernel="rbf", gamma=gamma, n_components=n_components, random_state=RANDOM_STATE)),
+            ("regressor", BayesianRidge()),
+        ]
+    )
+
+
+# ---------------------------------------------------------------------------
+# 2. Scalable probabilistic modeling
+# ---------------------------------------------------------------------------
+@dataclass
+class TargetModel:
+    """A trained surrogate for one target, plus the metadata the agent
+    needs to reason about its own reliability."""
+
+    name: str
+    pipeline: Pipeline
+    best_params: dict[str, Any]
+    cv_r2: float
+    test_r2: float
+    test_rmse: float
+    test_mean_std: float
+    test_coverage_95: float
+    uncertainty_threshold: float  # data-driven "std is too high" cutoff
+
+
+@dataclass
+class HTGRSurrogate:
+    """Bundles one TargetModel per target column plus the training feature
+    envelope, so out-of-distribution queries can be flagged deterministically."""
+
+    targets: dict[str, TargetModel] = field(default_factory=dict)
+    feature_bounds: dict[str, tuple[float, float]] = field(default_factory=dict)
+
+    def fit(self, df: pd.DataFrame) -&gt; "HTGRSurrogate":
+        x = df[FEATURE_COLUMNS]
+        self.feature_bounds = {col: (float(x[col].min()), float(x[col].max())) for col in FEATURE_COLUMNS}
+
+        for target in TARGET_COLUMNS:
+            y = df[target]
+            x_train, x_test, y_train, y_test = train_test_split(
+                x, y, test_size=0.2, random_state=RANDOM_STATE
+            )
+
+            search = GridSearchCV(
+                make_pipeline(), PARAM_GRID, cv=5, scoring="r2", n_jobs=-1
+            )
+            search.fit(x_train, y_train)
+            best_pipeline: Pipeline = search.best_estimator_
+
+            y_pred, y_std = best_pipeline.predict(x_test, return_std=True)
+            test_r2 = r2_score(y_test, y_pred)
+            test_rmse = float(np.sqrt(mean_squared_error(y_test, y_pred)))
+            coverage = float(np.mean(np.abs(y_test.to_numpy() - y_pred) &lt;= CONFIDENCE_Z * y_std))
+            mean_std = float(np.mean(y_std))
+            # Data-driven "uncertainty is too high" cutoff: mean + 2*std of
+            # the held-out predictive std itself, i.e. flag queries whose
+            # model uncertainty is unusually large relative to what the
+            # model normally reports on in-distribution data.
+            uncertainty_threshold = mean_std + 2.0 * float(np.std(y_std))
+
+            self.targets[target] = TargetModel(
+                name=target,
+                pipeline=best_pipeline,
+                best_params=search.best_params_,
+                cv_r2=float(search.best_score_),
+                test_r2=float(test_r2),
+                test_rmse=test_rmse,
+                test_mean_std=mean_std,
+                test_coverage_95=coverage,
+                uncertainty_threshold=uncertainty_threshold,
+            )
+        return self
+
+    def predict(self, features: dict[str, float]) -&gt; dict[str, tuple[float, float]]:
+        """Query every target model for one operating point.
+        Returns {target_name: (mean, std)}.
+        """
+        x = pd.DataFrame([{col: features[col] for col in FEATURE_COLUMNS}])
+        out = {}
+        for name, target_model in self.targets.items():
+            mean, std = target_model.pipeline.predict(x, return_std=True)
+            out[name] = (float(mean[0]), float(std[0]))
+        return out
+
+    def out_of_bounds_features(self, features: dict[str, float]) -&gt; list[str]:
+        """Deterministic extrapolation guard: which inputs fall outside the
+        training envelope (see module docstring for why this exists
+        alongside, not instead of, the model's self-reported std)."""
+        flagged = []
+        for col in FEATURE_COLUMNS:
+            lo, hi = self.feature_bounds[col]
+            if not (lo &lt;= features[col] &lt;= hi):
+                flagged.append(col)
+        return flagged
+
+
+# ---------------------------------------------------------------------------
+# 3. Agentic workflow
+# ---------------------------------------------------------------------------
+@dataclass
+class AgentReport:
+    scenario: dict[str, float]
+    status: str  # "NOMINAL" | "UNCERTAIN" | "UNSAFE"
+    predictions: dict[str, tuple[float, float]]
+    flags: list[str]
+    recommendations: list[str]
+
+
+class HTGRAgent:
+    """Autonomously evaluates candidate HTGR operating points against the
+    trained surrogate and decides whether they're safe to recommend,
+    flags them as statistically unreliable, or flags them as unsafe -
+    with a root-cause-style diagnostic explaining why.
+    """
+
+    def __init__(
+        self,
+        surrogate: HTGRSurrogate,
+        safety_margin_k: float = FUEL_TEMP_SAFETY_MARGIN_K,
+        confidence_z: float = CONFIDENCE_Z,
+    ) -&gt; None:
+        self.surrogate = surrogate
+        self.safety_margin_k = safety_margin_k
+        self.confidence_z = confidence_z
+
+    def _recommend(self, scenario: dict[str, float]) -&gt; list[str]:
+        """Simple domain-knowledge heuristics (core_thermals.m energy
+        balance: more flow / cooler inlet / less positive reactivity -&gt;
+        lower fuel temperature) for how to pull a hot scenario back down."""
+        recs = []
+        lo, hi = self.surrogate.feature_bounds["helium_mass_flow_kgs"]
+        if scenario["helium_mass_flow_kgs"] &lt; (lo + hi) / 2:
+            recs.append("Increase helium_mass_flow_kgs to improve core cooling.")
+        if scenario["rho_insertion"] &gt; 0:
+            recs.append("Reduce the positive rho_insertion (less reactivity added).")
+        lo, hi = self.surrogate.feature_bounds["coolant_inlet_temp_K"]
+        if scenario["coolant_inlet_temp_K"] &gt; (lo + hi) / 2:
+            recs.append("Lower coolant_inlet_temp_K (more pre-cooler duty upstream).")
+        return recs
+
+    def evaluate(self, scenario: dict[str, float]) -&gt; AgentReport:
+        predictions = self.surrogate.predict(scenario)
+        oob_features = self.surrogate.out_of_bounds_features(scenario)
+
+        flags: list[str] = []
+        status = "NOMINAL"
+
+        fuel_mean, fuel_std = predictions["peak_fuel_temp_K"]
+        fuel_upper_bound = fuel_mean + self.confidence_z * fuel_std
+        fuel_threshold = self.surrogate.targets["peak_fuel_temp_K"].uncertainty_threshold
+
+        if oob_features:
+            status = "UNCERTAIN"
+            flags.append(
+                f"EXTRAPOLATION RISK: {', '.join(oob_features)} fall outside the training "
+                "envelope - the surrogate's self-reported std is not trustworthy here "
+                "(Nystroem+BayesianRidge doesn't guarantee uncertainty grows with distance "
+                "from training data the way a true GP does)."
+            )
+
+        if fuel_std &gt; fuel_threshold:
+            status = "UNCERTAIN" if status == "NOMINAL" else status
+            flags.append(
+                f"HIGH MODEL UNCERTAINTY on peak_fuel_temp_K: std={fuel_std:.1f} K exceeds "
+                f"the data-driven threshold of {fuel_threshold:.1f} K."
+            )
+
+        if fuel_upper_bound &gt; self.safety_margin_k:
+            status = "UNSAFE"
+            flags.append(
+                f"SAFETY MARGIN BREACH: predicted peak fuel temperature "
+                f"{fuel_mean:.1f} K (+{self.confidence_z:.0f}sigma -&gt; {fuel_upper_bound:.1f} K) "
+                f"exceeds the {self.safety_margin_k:.0f} K limit."
+            )
+
+        recommendations = self._recommend(scenario) if status != "NOMINAL" else []
+
+        return AgentReport(
+            scenario=scenario,
+            status=status,
+            predictions=predictions,
+            flags=flags,
+            recommendations=recommendations,
+        )
+
+    @staticmethod
+    def print_report(report: AgentReport) -&gt; None:
+        fuel_mean, fuel_std = report.predictions["peak_fuel_temp_K"]
+        work_mean, work_std = report.predictions["turbine_work_MW"]
+
+        print(f"\n{'=' * 70}")
+        print(f"HTGRAgent verdict: {report.status}")
+        print(f"{'=' * 70}")
+        print("Scenario:")
+        for k, v in report.scenario.items():
+            print(f"  {k:24s} = {v}")
+        print(f"\nPredicted peak_fuel_temp_K : {fuel_mean:8.2f}  (std {fuel_std:6.2f})")
+        print(f"Predicted turbine_work_MW  : {work_mean:8.2f}  (std {work_std:6.2f})")
+
+        if report.flags:
+            print("\nRoot-cause diagnostics:")
+            for f in report.flags:
+                print(f"  - {f}")
+        if report.recommendations:
+            print("\nRecommended adjustments:")
+            for r in report.recommendations:
+                print(f"  - {r}")
+        if report.status == "NOMINAL":
+            print("\nNo issues detected - scenario cleared for the fuel-temperature safety check.")
+
+
+# ---------------------------------------------------------------------------
+# 4. Execution block
+# ---------------------------------------------------------------------------
+def main() -&gt; HTGRAgent:
+    if not DATA_PATH.exists():
+        print(f"error: {DATA_PATH} not found - run data_pipeline.py first.", file=sys.stderr)
+        sys.exit(1)
+
+    df = load_telemetry()
+    print(f"Loaded {len(df)} successful runs from {DATA_PATH.name}")
+    print(f"Features: {FEATURE_COLUMNS}")
+    print(f"Targets:  {TARGET_COLUMNS}\n")
+
+    surrogate = HTGRSurrogate().fit(df)
+
+    print(f"{'Target':&lt;20s}{'CV R2':&gt;10s}{'Test R2':&gt;10s}{'Test RMSE':&gt;12s}{'Mean std':&gt;10s}{'95% cov.':&gt;10s}")
+    for name, tm in surrogate.targets.items():
+        print(
+            f"{name:&lt;20s}{tm.cv_r2:10.4f}{tm.test_r2:10.4f}{tm.test_rmse:12.4f}"
+            f"{tm.test_mean_std:10.4f}{tm.test_coverage_95:10.2%}"
+        )
+        print(f"    best params: {tm.best_params}")
+
+    if HTGRSurrogate.__module__ == "__main__":
+        print(
+            "\nWARNING: this module is running as '__main__' (e.g. `python src/ml_surrogate.py`). "
+            "The saved artifact will be pickled under the '__main__' module and will FAIL to "
+            "unpickle from anywhere that imports this file normally (notebook, app.py, etc.) with "
+            "`AttributeError: Can't get attribute 'TargetModel' on &lt;module '__main__'&gt;`. "
+            "Regenerate instead with:\n"
+            "    python -c \"from src.ml_surrogate import main; main()\"\n"
+            "run from the project root.",
+            file=sys.stderr,
+        )
+
+    MODELS_DIR.mkdir(parents=True, exist_ok=True)
+    joblib.dump(surrogate, MODEL_PATH)
+    print(f"\nSaved trained surrogate to {MODEL_PATH}")
+
+    agent = HTGRAgent(surrogate)
+
+    print("\n\n### Demo 1: a moderate, in-distribution operating point ###")
+    agent.print_report(agent.evaluate(SAFE_SCENARIO_DEMO))
+
+    print("\n\n### Demo 2: low flow + hot inlet + strong positive reactivity ###")
+    agent.print_report(agent.evaluate(UNSAFE_SCENARIO_DEMO))
+
+    return agent
+
+
+if __name__ == "__main__":
+    main()
+</code></pre>
+</div>
+
+
+<div class="page appendix-section">
+<h2 id="appE">Appendix E &mdash; Streamlit Dashboard</h2>
+<p><code>app.py</code> &mdash; the interactive operating-point explorer (Part VII.2).</p>
+<pre class="code"><code>"""Streamlit dashboard: interactively query the HTGR Nystroem+BayesianRidge
+surrogate through the same ``HTGRAgent`` used in ``ml_surrogate.py``'s
+``__main__`` demo and ``notebooks/HTGR_Analysis.ipynb``.
+
+No model or agent logic lives here - this is a thin UI layer over
+``src.ml_surrogate``, imported directly per project convention. Run with:
+
+    streamlit run app.py
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import joblib
+import plotly.graph_objects as go
+import streamlit as st
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from src.data_pipeline import (  # noqa: E402
+    COOLANT_INLET_BOUNDS,
+    HELIUM_FLOW_BOUNDS,
+    RHO_INSERTION_BOUNDS,
+)
+from src.htgr_physics import KineticsParams, OperatingConditions  # noqa: E402
+from src.ml_surrogate import (  # noqa: E402
+    FUEL_TEMP_SAFETY_MARGIN_K,
+    MODEL_PATH,
+    HTGRAgent,
+    HTGRSurrogate,
+)
+
+# Fixed (non-slider) inputs, held at the report's design values (Appendix A,
+# Table 9) - not swept here to keep the dashboard to the 3 controls asked for.
+FIXED_RHO_STEP_TIME_S = 100.0
+FIXED_TURBINE_P_IN_PA = 70.0e5
+FIXED_TURBINE_P_BACK_PA = 45.0e5
+FIXED_TURBINE_ETA_IS = 0.885
+
+st.set_page_config(page_title="HTGR Operating Point Explorer", page_icon="⚛️", layout="wide")
+
+
+@st.cache_resource
+def load_surrogate() -&gt; HTGRSurrogate:
+    if not MODEL_PATH.exists():
+        st.error(
+            f"No trained model found at `{MODEL_PATH}`.\n\n"
+            "Run this first, from the project root:\n\n"
+            '`python -c "from src.ml_surrogate import main; main()"`'
+        )
+        st.stop()
+    return joblib.load(MODEL_PATH)
+
+
+surrogate = load_surrogate()
+agent = HTGRAgent(surrogate)
+nominal = OperatingConditions()
+beta_total = KineticsParams().beta_total
+
+# ---------------------------------------------------------------------------
+# Sidebar controls
+# ---------------------------------------------------------------------------
+st.sidebar.header("Operating Point")
+
+mass_flow = st.sidebar.slider(
+    "Helium mass flow (kg/s)",
+    min_value=float(HELIUM_FLOW_BOUNDS[0]),
+    max_value=float(HELIUM_FLOW_BOUNDS[1]),
+    value=float(nominal.helium_mass_flow),
+    step=0.5,
+)
+
+inlet_temp = st.sidebar.slider(
+    "Coolant inlet temperature (K)",
+    min_value=float(COOLANT_INLET_BOUNDS[0]),
+    max_value=float(COOLANT_INLET_BOUNDS[1]),
+    value=float(nominal.coolant_inlet_temp),
+    step=0.5,
+)
+
+rho_dollar_bounds = (RHO_INSERTION_BOUNDS[0] / beta_total, RHO_INSERTION_BOUNDS[1] / beta_total)
+rho_dollars = st.sidebar.slider(
+    "Reactivity step ($)",
+    min_value=round(rho_dollar_bounds[0], 2),
+    max_value=round(rho_dollar_bounds[1], 2),
+    value=0.0,
+    step=0.01,
+    help=f"Dollars = rho / beta_total. beta_total = {beta_total:.4f} for this 6-group model. "
+    "0$ = no reactivity perturbation (steady state).",
+)
+rho_insertion = rho_dollars * beta_total
+
+with st.sidebar.expander("Fixed design parameters"):
+    st.caption("Held at the report's design values (Appendix A, Table 9); not exposed as controls.")
+    st.write(f"Reactivity step timing: {FIXED_RHO_STEP_TIME_S:.0f} s")
+    st.write(f"Turbine inlet pressure: {FIXED_TURBINE_P_IN_PA / 1e5:.0f} bar")
+    st.write(f"Turbine back pressure: {FIXED_TURBINE_P_BACK_PA / 1e5:.0f} bar")
+    st.write(f"Turbine isentropic efficiency: {FIXED_TURBINE_ETA_IS:.3f}")
+
+# ---------------------------------------------------------------------------
+# Query the surrogate + agent
+# ---------------------------------------------------------------------------
+scenario = {
+    "helium_mass_flow_kgs": mass_flow,
+    "coolant_inlet_temp_K": inlet_temp,
+    "rho_insertion": rho_insertion,
+    "rho_step_time_s": FIXED_RHO_STEP_TIME_S,
+    "turbine_p_in_Pa": FIXED_TURBINE_P_IN_PA,
+    "turbine_p_back_Pa": FIXED_TURBINE_P_BACK_PA,
+    "turbine_eta_is": FIXED_TURBINE_ETA_IS,
+}
+report = agent.evaluate(scenario)
+fuel_mean, fuel_std = report.predictions["peak_fuel_temp_K"]
+work_mean, work_std = report.predictions["turbine_work_MW"]
+fuel_band = agent.confidence_z * fuel_std
+
+# ---------------------------------------------------------------------------
+# Main display
+# ---------------------------------------------------------------------------
+st.title("HTGR Operating Point Explorer")
+st.caption(
+    "Live query against the Nystroem(RBF)+BayesianRidge surrogate (`src/ml_surrogate.py`) "
+    "and the `HTGRAgent` safety wrapper - same model, same logic as the notebook and CLI demo."
+)
+
+col1, col2, col3 = st.columns(3)
+col1.metric(
+    "Predicted Peak Fuel Temp",
+    f"{fuel_mean:,.1f} K",
+    delta=f"±{fuel_band:.1f} K (2σ)",
+    delta_color="off",
+)
+col2.metric(
+    "Predicted Turbine Work",
+    f"{work_mean:,.1f} MW",
+    delta=f"±{agent.confidence_z * work_std:.2f} MW (2σ)",
+    delta_color="off",
+)
+col3.metric(
+    "Model Uncertainty (fuel temp, 2σ)",
+    f"±{fuel_band:.1f} K",
+    delta=f"flag threshold: {surrogate.targets['peak_fuel_temp_K'].uncertainty_threshold:.1f} K std",
+    delta_color="off",
+)
+
+# --- Safety gauge -----------------------------------------------------------
+gauge_lo, gauge_hi = 1350.0, 1950.0
+gauge = go.Figure(
+    go.Indicator(
+        mode="gauge+number",
+        value=fuel_mean,
+        number={"suffix": " K", "font": {"size": 36}},
+        title={"text": f"Peak Fuel Temperature vs. {FUEL_TEMP_SAFETY_MARGIN_K:.0f} K Safety Margin"},
+        gauge={
+            "axis": {"range": [gauge_lo, gauge_hi]},
+            "bar": {"color": "black", "thickness": 0.25},
+            "steps": [
+                {"range": [gauge_lo, FUEL_TEMP_SAFETY_MARGIN_K], "color": "#c8e6c9"},
+                {"range": [FUEL_TEMP_SAFETY_MARGIN_K, gauge_hi], "color": "#ffcdd2"},
+            ],
+            "threshold": {
+                "line": {"color": "red", "width": 4},
+                "thickness": 0.9,
+                "value": FUEL_TEMP_SAFETY_MARGIN_K,
+            },
+        },
+    )
+)
+gauge.update_layout(height=300, margin=dict(l=30, r=30, t=60, b=10))
+st.plotly_chart(gauge, use_container_width=True)
+
+# --- Agent diagnostic panel --------------------------------------------------
+st.subheader("HTGRAgent Diagnostic")
+
+status_box = {"NOMINAL": st.success, "UNCERTAIN": st.warning, "UNSAFE": st.error}.get(report.status, st.info)
+status_box(f"**Verdict: {report.status}**")
+
+if report.flags:
+    st.markdown("**Root-cause diagnostics:**")
+    for flag in report.flags:
+        st.markdown(f"- {flag}")
+else:
+    st.markdown("No issues detected - scenario cleared for the fuel-temperature safety check.")
+
+if report.recommendations:
+    st.markdown("**Recommended adjustments:**")
+    for rec in report.recommendations:
+        st.markdown(f"- {rec}")
+
+with st.expander("Full scenario passed to the surrogate"):
+    st.json(scenario)
+
+with st.expander("Surrogate model diagnostics (held-out test set)"):
+    for name, tm in surrogate.targets.items():
+        st.write(
+            f"**{name}** — CV R²={tm.cv_r2:.4f}, Test R²={tm.test_r2:.4f}, "
+            f"RMSE={tm.test_rmse:.4f}, mean predictive std={tm.test_mean_std:.4f}, "
+            f"95% CI coverage={tm.test_coverage_95:.1%}"
+        )
+</code></pre>
+</div>
+
+
+<div class="page appendix-section">
+<h2 id="appF">Appendix F &mdash; Notebook Styling Utility</h2>
+<p><code>scripts/build_styled_html.py</code> &mdash; regenerates the styled standalone HTML exports of
+both project notebooks, including this report's own typographic system (Part VII.3).</p>
+<pre class="code"><code>"""Export notebooks/*.ipynb to standalone, custom-styled HTML files.
+
+Why this exists: GitHub's hosted .ipynb renderer sanitizes embedded CSS in
+markdown cells, so a notebook's typography and background can't be
+controlled from within the .ipynb file itself when viewed there. This
+script instead post-processes nbconvert's own HTML export - a file this
+repo fully owns - with a "textbook" stylesheet (Times New Roman prose on a
+warm parchment background, monospace code left untouched) that renders
+identically in any browser, independent of any third-party renderer's
+sanitization rules.
+
+Run from anywhere:
+    python scripts/build_styled_html.py
+
+Regenerate after editing either notebook so the .html twins stay in sync.
+"""
+
+from __future__ import annotations
+
+import subprocess
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+PYTHON = REPO / "venv" / "Scripts" / "python.exe"
+NOTEBOOKS_DIR = REPO / "notebooks"
+NOTEBOOK_NAMES = ["HTGR_Systems_Textbook.ipynb", "HTGR_Analysis.ipynb"]
+
+CUSTOM_CSS = """
+&lt;style&gt;
+/* ===================== HTGR Textbook custom styling ===================== */
+html, body, .container {
+  background-color: #FAF6EC !important;
+  color: #2B2620 !important;
+  font-family: "Times New Roman", Times, Georgia, serif !important;
+}
+.text_cell_render, .rendered_html {
+  font-family: "Times New Roman", Times, Georgia, serif !important;
+  color: #2B2620 !important;
+  font-size: 18px !important;
+  line-height: 1.65 !important;
+}
+.text_cell_render h1, .rendered_html h1 {
+  font-family: "Times New Roman", Times, Georgia, serif !important;
+  color: #17304D !important;
+  border-bottom: 2px solid #B8860B;
+  padding-bottom: 0.25em;
+}
+.text_cell_render h2, .rendered_html h2,
+.text_cell_render h3, .rendered_html h3,
+.text_cell_render h4, .rendered_html h4 {
+  font-family: "Times New Roman", Times, Georgia, serif !important;
+  color: #1F3A5F !important;
+  border-bottom: 1px solid #D8D0BC;
+  padding-bottom: 0.2em;
+}
+.text_cell_render a, .rendered_html a { color: #7B241C !important; text-decoration: none; border-bottom: 1px dotted #7B241C; }
+.text_cell_render a:hover, .rendered_html a:hover { color: #a52e21 !important; }
+.text_cell_render strong, .rendered_html strong { color: #17304D; }
+.text_cell_render blockquote, .rendered_html blockquote {
+  border-left: 3px solid #B8860B; color: #4A4436; background: #F3EEDF; padding: 0.6em 1em; margin-left: 0;
+}
+.text_cell_render table, .rendered_html table, table.dataframe {
+  font-family: "Times New Roman", Times, Georgia, serif !important;
+  border-collapse: collapse !important;
+  border: 1px solid #D8D0BC !important;
+}
+table.dataframe th, .text_cell_render table th, .rendered_html table th {
+  background-color: #E9E0C8 !important; color: #17304D !important; border: 1px solid #D8D0BC !important;
+}
+table.dataframe td, .text_cell_render table td, .rendered_html table td {
+  border: 1px solid #E4DDC9 !important;
+}
+table.dataframe tbody tr:nth-child(even) { background-color: #F3EEDF !important; }
+table.dataframe tbody tr:nth-child(odd) { background-color: #FAF6EC !important; }
+
+.cell { background-color: transparent !important; border: none !important; }
+hr { border-top: 1px solid #D8D0BC; }
+
+/* Code stays monospace - only the surrounding panel adopts the palette */
+.input_area, .highlight, pre, code, .output_text, .output_stream, .CodeMirror {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace !important;
+  font-size: 14px !important;
+}
+.input_area {
+  background-color: #F0EBDD !important;
+  border: 1px solid #D8D0BC !important;
+  border-radius: 5px;
+}
+.output_area pre, .output_stream {
+  background-color: #F5F1E6 !important;
+  color: #2B2620 !important;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+.prompt { font-family: "SFMono-Regular", Consolas, monospace !important; color: #8A7F63 !important; }
+&lt;/style&gt;
+"""
+
+
+def build(nb_name: str) -&gt; None:
+    nb_path = NOTEBOOKS_DIR / nb_name
+    out_html = nb_path.with_suffix(".html")
+
+    subprocess.run(
+        [
+            str(PYTHON), "-m", "jupyter", "nbconvert", "--to", "html", "--template", "classic",
+            str(nb_path), "--output", out_html.name,
+        ],
+        cwd=str(NOTEBOOKS_DIR),
+        check=True,
+    )
+
+    html = out_html.read_text(encoding="utf-8")
+    if "&lt;/head&gt;" not in html:
+        raise RuntimeError(f"Unexpected nbconvert output for {nb_name}: no &lt;/head&gt; tag found")
+    html = html.replace("&lt;/head&gt;", CUSTOM_CSS + "&lt;/head&gt;", 1)
+    out_html.write_text(html, encoding="utf-8")
+    print(f"Wrote styled {out_html.relative_to(REPO)} ({out_html.stat().st_size:,} bytes)")
+
+
+if __name__ == "__main__":
+    for name in NOTEBOOK_NAMES:
+        build(name)
+</code></pre>
+<div class="footer-note">End of report. Generated 03 September 2026 from the HTGR-ML-Optimization repository
+source tree; Appendices B&ndash;F are byte-identical to the committed source files at generation
+time.</div>
+</div>
+
+</body>
+</html>
